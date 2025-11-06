@@ -13,35 +13,35 @@ function PropertiesStat() {
 
   const chartData = [
     { name: 'Occupied', value: occupied, fill: '#10b981' },
-    { name: 'Vacant', value: vacant, fill: '#d1d5db' },
-    { name: 'Developed', value: developed, fill: '#e5e7eb' },
-    { name: 'In Progress', value: inProgress, fill: '#374151' },
-    { name: 'Undeveloped', value: undeveloped, fill: '#1f2937' },
+    { name: 'Vacant', value: vacant, fill: '#a3e4c4' },
+    { name: 'Developed', value: developed, fill: '#d1fae5' },
+    { name: 'In Progress', value: inProgress, fill: '#6b7280' },
+    { name: 'Undeveloped', value: undeveloped, fill: '#4b5563' },
   ]
 
   const legendItems = [
     { label: 'Occupied', color: '#10b981' },
-    { label: 'Vacant', color: '#d1d5db' },
-    { label: 'Developed', color: '#e5e7eb' },
-    { label: 'In Progress', color: '#374151' },
-    { label: 'Undeveloped', color: '#1f2937' },
+    { label: 'Vacant', color: '#a3e4c4' },
+    { label: 'Developed', color: '#d1fae5' },
+    { label: 'In Progress', color: '#6b7280' },
+    { label: 'Undeveloped', color: '#4b5563' },
   ]
 
   return (
     <Card className="rounded-lg border border-neutral-200 shadow-none bg-white">
-      <CardHeader className="text-xs font-semibold text-neutral-900 pb-2 pt-3 px-4">Properties Statistics</CardHeader>
+      <CardHeader className="text-sm font-bold text-neutral-900 pb-2 pt-3 px-4">Properties Statistics</CardHeader>
       <CardContent className="pt-0 px-4 pb-3">
         {/* Donut Chart with center text */}
         <div className="flex justify-center mb-3 relative">
-          <ResponsiveContainer width={100} height={100}>
+          <ResponsiveContainer width={120} height={120}>
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={30}
-                outerRadius={50}
-                paddingAngle={0}
+                innerRadius={38}
+                outerRadius={58}
+                paddingAngle={2}
                 dataKey="value"
                 startAngle={90}
                 endAngle={-270}
@@ -56,28 +56,29 @@ function PropertiesStat() {
           {/* Center text overlay - positioned absolutely in center of chart */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
+              <div className="text-[9px] text-neutral-400 font-normal mb-0.5">Total Properties</div>
               <div className="text-sm font-bold text-neutral-900">{propertiesCount} Units</div>
             </div>
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="space-y-1 text-[9px]">
+        {/* Legend - 3 items on first row, 2 items on second row centered */}
+        <div className="space-y-1.5 text-[10px]">
           {/* First row - 3 items */}
           <div className="flex items-center justify-center gap-3">
             {legendItems.slice(0, 3).map((item, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }}></div>
-                <span className="text-neutral-600 font-normal">{item.label}</span>
+              <div key={i} className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }}></div>
+                <span className="text-neutral-500 font-normal">{item.label}</span>
               </div>
             ))}
           </div>
           {/* Second row - 2 items centered */}
           <div className="flex items-center justify-center gap-3">
             {legendItems.slice(3, 5).map((item, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }}></div>
-                <span className="text-neutral-600 font-normal">{item.label}</span>
+              <div key={i} className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }}></div>
+                <span className="text-neutral-500 font-normal">{item.label}</span>
               </div>
             ))}
           </div>
@@ -91,67 +92,96 @@ function SalesStat() {
   const monthlyRevenue = useInvestorStore((s) => s.totalEarnings)
   
   const chartData = [
-    { name: 'Jul', value: 40 },
-    { name: 'Aug', value: 65 },
-    { name: 'Sep', value: 45 },
-    { name: 'Oct', value: 70 },
-    { name: 'Nov', value: 55 },
-    { name: 'Dec', value: 75 },
-    { name: 'Jan', value: 60 },
+    { name: 'Jul', value: 200 },
+    { name: 'Aug', value: 320 },
+    { name: 'Sep', value: 280 },
+    { name: 'Oct', value: 520 },
+    { name: 'Nov', value: 800 },
+    { name: 'Dec', value: 300 },
+    { name: 'Jan', value: 600 },
   ]
 
   return (
     <Card className="rounded-lg border border-neutral-200 shadow-none bg-white">
-      <CardHeader className="text-xs font-semibold text-neutral-900 pb-2 pt-3 px-4">Sales Statistics</CardHeader>
+      <CardHeader className="text-sm font-bold text-neutral-900 pb-2 pt-3 px-4">Sales Statistics</CardHeader>
       <CardContent className="pt-0 px-4 pb-3">
-        {/* Total Sales */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-1">
-            <div className="text-[9px] text-neutral-500 font-normal">Total Sales</div>
-            <div className="flex items-center gap-1 text-emerald-600 text-[9px] font-semibold">
-              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd"/>
+        {/* Top section with Total Sales and Rents */}
+        <div className="flex items-start justify-between gap-3 mb-3">
+          {/* Total Sales - Left side */}
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <div className="text-[10px] text-neutral-500 font-normal">Total Sales</div>
+              <div className="flex items-center gap-0.5 text-emerald-600 text-[9px] font-semibold">
+                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd"/>
+                </svg>
+              </div>
+            </div>
+            <div className="text-xl font-bold text-neutral-900">${monthlyRevenue.toLocaleString()}</div>
+          </div>
+
+          {/* Rents box - Right side */}
+          <div className="bg-neutral-50 rounded-lg px-3 py-2 min-w-[110px]">
+            <div className="flex items-center gap-1.5 mb-1">
+              <svg className="w-3 h-3 text-neutral-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
               </svg>
-              <span>13546</span>
+              <span className="text-[9px] text-neutral-500 font-medium">Rents</span>
+              <svg className="w-2.5 h-2.5 text-yellow-500 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+              </svg>
+            </div>
+            <div className="text-xs font-bold text-neutral-900 mb-1.5">13,546</div>
+            <div className="w-full bg-neutral-200 rounded-full h-1">
+              <div className="bg-emerald-500 h-1 rounded-full" style={{ width: '60%' }}></div>
             </div>
           </div>
-          <div className="text-base font-semibold text-neutral-900 mb-1">${monthlyRevenue.toLocaleString()}</div>
         </div>
+
+        {/* Divider line */}
+        <div className="border-t border-neutral-200 mb-2.5"></div>
 
         {/* Monthly Revenue Chart */}
         <div>
-          <div className="flex items-center justify-between text-[9px] mb-2">
-            <span className="text-neutral-500 font-normal">Monthly Revenue</span>
-            <span className="text-emerald-600 font-semibold">30%</span>
+          <div className="flex items-center justify-between text-[10px] mb-2">
+            <span className="text-neutral-900 font-semibold">Monthly Revenue</span>
+            <span className="text-emerald-500 font-bold">30%</span>
           </div>
           
           {/* Area Chart */}
-          <ResponsiveContainer width="100%" height={80}>
-            <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={100}>
+            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="0" stroke="transparent" vertical={false} />
+              <CartesianGrid strokeDasharray="0" stroke="#f3f4f6" vertical={false} />
               <XAxis 
                 dataKey="name" 
-                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                tick={{ fontSize: 9, fill: '#6b7280' }}
                 axisLine={false}
                 tickLine={false}
               />
-              <YAxis hide={true} />
+              <YAxis 
+                tick={{ fontSize: 9, fill: '#6b7280' }}
+                axisLine={false}
+                tickLine={false}
+                domain={[0, 800]}
+                ticks={[0, 200, 400, 600, 800]}
+              />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#f3f4f6', 
-                  border: 'none', 
+                  backgroundColor: '#ffffff', 
+                  border: '1px solid #e5e7eb', 
                   borderRadius: '6px',
-                  fontSize: '10px'
+                  fontSize: '9px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                 }}
               />
               <Area 
-                type="monotone" 
+                type="natural" 
                 dataKey="value" 
                 stroke="#10b981" 
                 strokeWidth={2}
@@ -171,37 +201,35 @@ function CustomersList() {
     { name: 'Mathew K.', phone: '+667 867 764', type: 'Rentals', status: 'Paid', avatar: 'M' },
     { name: 'Mathew K.', phone: '+667 867 764', type: 'Hostel', status: 'Owing', avatar: 'M' },
     { name: 'Mathew K.', phone: '+667 867 764', type: 'Leasing', status: 'Owing', avatar: 'M' },
+    { name: 'Mathew K.', phone: '+667 867 764', type: 'Rentals', status: 'Paid', avatar: 'M' },
   ]
   
   return (
     <Card className="rounded-lg border border-neutral-200 shadow-none bg-white">
-      <CardHeader className="text-xs font-semibold text-neutral-900 pb-2 pt-3 px-4">Customers List</CardHeader>
+      <CardHeader className="text-sm font-bold text-neutral-900 pb-2 pt-3 px-4">Customers List</CardHeader>
       <CardContent className="pt-0 px-4 pb-3">
         {/* Table header */}
-        <div className="grid grid-cols-4 gap-2 text-[9px] font-semibold text-neutral-500 mb-2 pb-2 border-b border-neutral-150">
+        <div className="grid grid-cols-4 gap-3 text-[10px] font-medium text-neutral-400 mb-3">
           <div>Customer</div>
           <div>Phone Number</div>
           <div>Type</div>
           <div className="text-right">Status</div>
         </div>
-
+        
         {/* Customer rows */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {customers.map((customer, i) => (
-            <div key={i} className="grid grid-cols-4 gap-2 items-center text-[10px]">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-neutral-300 to-neutral-400 flex items-center justify-center text-[9px] font-medium text-white flex-shrink-0">
-                  {customer.avatar}
-                </div>
+            <div key={i} className="grid grid-cols-4 gap-3 items-center text-xs border-b border-neutral-100 last:border-0 pb-2.5 last:pb-0">
+              <div className="flex items-center gap-2 min-w-0">
                 <span className="font-semibold text-neutral-900 truncate">{customer.name}</span>
               </div>
               <div className="text-neutral-600 font-normal">{customer.phone}</div>
               <div className="text-neutral-600 font-normal">{customer.type}</div>
               <div className="text-right">
-                <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-semibold whitespace-nowrap ${
+                <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap ${
                   customer.status === 'Paid' 
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                    : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                    ? 'bg-emerald-50 text-emerald-600' 
+                    : 'bg-yellow-50 text-yellow-600'
                 }`}>
                   {customer.status}
                 </span>

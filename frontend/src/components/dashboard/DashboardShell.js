@@ -13,11 +13,11 @@ export default function DashboardShell({ children, rightSidebar }) {
   const Sidebar = role === 'admin' ? AdminSidebar : role === 'investor' ? InvestorSidebar : InvestorSidebar
 
   return (
-    <div className="min-h-screen bg-white text-text">
+    <div className="h-screen bg-white text-text overflow-hidden flex flex-col">
       <Navbar />
-      <div className="w-full px-6 py-4">
+      <div className="flex-1 overflow-hidden px-3 py-2">
         {/* Two column layout: main content and right sidebar */}
-        <div className={`grid grid-cols-1 gap-6 ${rightSidebar ? 'lg:grid-cols-[1fr_380px]' : 'lg:grid-cols-1'}`}>
+        <div className={`h-full grid grid-cols-1 gap-3 overflow-auto ${rightSidebar ? 'lg:grid-cols-[1fr_300px]' : 'lg:grid-cols-1'}`}>
           <main className="min-h-0">
             {children}
           </main>

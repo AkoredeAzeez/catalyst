@@ -17,34 +17,59 @@ export default function InvestorPage() {
   return (
     <RoleGuard allowed={['investor', 'admin']}>
       <DashboardShell rightSidebar={<PropertiesSidebar />}>
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-0">
-          {/* Left sidebar */}
-          <div className="min-w-0 pr-4">
-            <InvestorSidebar />
-          </div>
+        <div className="h-full flex flex-col gap-2">
+          {/* Top section: Sidebar + Image */}
+          <div className="grid grid-cols-1 lg:grid-cols-[269px_1fr] gap-2 flex-shrink-0">
+            {/* Left sidebar */}
+            <div className="min-w-0">
+              <InvestorSidebar />
+            </div>
 
-          {/* Property Image Display - Full bleed, no border */}
-          <div className="relative overflow-hidden bg-neutral-100 h-full">
-            <Image 
-              src={image} 
-              alt={`${currentRoomName} view`}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 1024px) 100vw, 70vw"
-            />
-            {/* Overlay with current room name - hidden for Exterior View */}
-            {selectedIndex !== 0 && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6 z-10">
-                <h2 className="text-white font-semibold text-lg">{currentRoomName}</h2>
+            {/* Property Image Display Container */}
+            <div className="relative flex flex-col items-center">
+              {/* 3D view label */}
+              <div className="w-full flex items-center justify-center mb-2">
+                <div className="flex items-center gap-2 text-neutral-700">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                  </svg>
+                  <span className="text-sm font-medium">3D view</span>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* Stats grid below */}
-        <div className="w-full mt-4 lg:pl-0">
-          <StatsGrid />
+              {/* Room name label above image */}
+              {selectedIndex !== 0 && (
+                <div className="mb-1 w-full text-center">
+                  <h2 className="text-neutral-900 font-semibold text-sm">{currentRoomName}</h2>
+                </div>
+              )}
+              
+              {/* Property Image Display with exact dimensions */}
+              <div 
+                className="relative overflow-hidden bg-neutral-100"
+                style={{
+                  width: '670.18px',
+                  height: '495.58px',
+                  transform: 'matrix(-1, 0, 0, 1, 0, 0)'
+                }}
+              >
+                <Image 
+                  src={image} 
+                  alt={`${currentRoomName} view`}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="690px"
+                  style={{ transform: 'scaleX(-1)' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Stats grid below */}
+          <div className="w-full flex-1 min-h-0">
+            <StatsGrid />
+          </div>
         </div>
       </DashboardShell>
     </RoleGuard>

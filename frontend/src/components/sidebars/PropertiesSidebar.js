@@ -42,32 +42,20 @@ export function PropertiesSidebar() {
   return (
     <aside className="hidden lg:block w-full">
       <div className="space-y-4">
-        {/* 3D View and Buy/Sell buttons */}
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            className="text-neutral-700 hover:bg-neutral-50 text-sm px-3 py-2 h-9 font-medium gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+        {/* Buy/Sell buttons */}
+        <div className="flex items-center justify-end gap-2">
+          <Button className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none shadow-none text-sm px-4 py-2 h-9 font-medium rounded-lg">
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            3D view
+            Buy
           </Button>
-          
-          <div className="flex items-center gap-2">
-            <Button className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none shadow-none text-sm px-4 py-2 h-9 font-medium rounded-lg">
-              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              Buy
-            </Button>
-            <Button variant="outline" className="text-neutral-600 border-neutral-200 hover:bg-neutral-50 text-sm px-4 py-2 h-9 font-medium rounded-lg bg-white">
-              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Sell
-            </Button>
-          </div>
+          <Button variant="outline" className="text-neutral-600 border-neutral-200 hover:bg-neutral-50 text-sm px-4 py-2 h-9 font-medium rounded-lg bg-white">
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Sell
+          </Button>
         </div>
 
         {/* My Properties section */}
