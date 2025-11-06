@@ -3,10 +3,10 @@ import { useInvestorStore } from '@/store/investor.store'
 import { useMemo } from 'react'
 
 const ROOM_LABELS = ['Exterior View', 'Kitchen', 'Bathroom', 'Bedroom', 'Livingroom']
-const CONTAINER_WIDTH = 239
-const CONTAINER_HEIGHT = 150.26
-const ROW_GAP = 14.4
-const THUMBNAIL_GAP = 3.79
+const CONTAINER_WIDTH = 210
+const CONTAINER_HEIGHT = 160
+const ROW_GAP = 22
+const THUMBNAIL_GAP = 12
 const MAX_PER_ROW = 3
 
 export default function ThumbnailList() {
@@ -15,21 +15,19 @@ export default function ThumbnailList() {
   const selectImage = useInvestorStore((s) => s.selectImage)
 
   // Calculate thumbnail dimensions based on number of images
-  const { thumbnailWidth, thumbnailHeight, rows } = useMemo(() => {
+  const { thumbnailSize, rows } = useMemo(() => {
     const totalImages = images.length
     const imagesPerRow = Math.min(totalImages, MAX_PER_ROW)
     const numRows = Math.ceil(totalImages / MAX_PER_ROW)
     
-    // Calculate width: account for gaps between thumbnails
-    const totalHorizontalGap = (imagesPerRow - 1) * THUMBNAIL_GAP
-    const availableWidth = CONTAINER_WIDTH - totalHorizontalGap
-    const width = availableWidth / imagesPerRow
-    
     // Calculate height: account for row gap and label space
-    const labelSpace = 16 // Space for labels
+    const labelSpace = 36 // Space for labels below thumbnails
     const totalVerticalGap = numRows > 1 ? ROW_GAP : 0
     const availableHeight = CONTAINER_HEIGHT - totalVerticalGap - labelSpace
     const height = availableHeight / numRows
+    
+    // Make thumbnails square using the height as both width and height
+    const size = height
     
     // Split images into rows
     const imageRows = []
@@ -38,8 +36,7 @@ export default function ThumbnailList() {
     }
     
     return { 
-      thumbnailWidth: width, 
-      thumbnailHeight: height,
+      thumbnailSize: size,
       rows: imageRows
     }
   }, [images.length])
@@ -48,48 +45,62 @@ export default function ThumbnailList() {
     <div className="w-full" style={{ maxWidth: `${CONTAINER_WIDTH}px`, height: `${CONTAINER_HEIGHT}px` }}>
       <div className="flex flex-col" style={{ gap: `${ROW_GAP}px` }}>
         {rows.map((rowImages, rowIndex) => (
-          <div key={rowIndex} className="flex" style={{ gap: `${THUMBNAIL_GAP}px` }}>
-            {rowImages.map((image, colIndex) => {
-              const imageIndex = rowIndex * MAX_PER_ROW + colIndex
-              return (
-                <button
-                  key={imageIndex}
-                  onClick={() => selectImage(imageIndex)}
-                  className={`relative flex-shrink-0 transition-all rounded-md overflow-hidden ${
-                    selectedIndex === imageIndex 
-                      ? 'ring-2 ring-offset-1 ring-emerald-500' 
-                      : 'hover:ring-2 hover:ring-offset-1 hover:ring-emerald-300'
-                  }`}
-                  style={{
-                    width: `${thumbnailWidth}px`,
-                    height: `${thumbnailHeight}px`
-                  }}
-                >
-                  {/* Thumbnail container */}
-                  <div className="w-full h-full bg-neutral-200 relative">
-                    <img
-                      src={image}
-                      alt={ROOM_LABELS[imageIndex] || `Room ${imageIndex + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23e5e7eb" width="80" height="80"/%3E%3C/svg%3E'
-                      }}
-                    />
-                    {/* Selected state overlay */}
-                    {selectedIndex === imageIndex && (
-                      <div className="absolute inset-0 bg-emerald-500/5"></div>
-                    )}
-                  </div>
-                  
-                  {/* Room label overlay at bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-1 py-0.5">
-                    <span className="text-[8px] font-medium text-white text-center block leading-tight truncate">
+          <div key={rowIndex} className="flex flex-col" style={{ gap: '6px' }}>
+            {/* Thumbnails row */}
+            <div className="flex" style={{ gap: `${THUMBNAIL_GAP}px` }}>
+              {rowImages.map((image, colIndex) => {
+                const imageIndex = rowIndex * MAX_PER_ROW + colIndex
+                return (
+                  <button
+                    key={imageIndex}
+                    onClick={() => selectImage(imageIndex)}
+                    className={`relative flex-shrink-0 transition-all rounded-xl overflow-hidden ${
+                      selectedIndex === imageIndex 
+                        ? 'ring-2 ring-offset-1 ring-emerald-500' 
+                        : 'hover:ring-2 hover:ring-offset-1 hover:ring-emerald-300'
+                    }`}
+                    style={{
+                      width: `${thumbnailSize}px`,
+                      height: `${thumbnailSize}px`
+                    }}
+                  >
+                    {/* Thumbnail container */}
+                    <div className="w-full h-full bg-neutral-200 relative">
+                      <img
+                        src={image}
+                        alt={ROOM_LABELS[imageIndex] || `Room ${imageIndex + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23e5e7eb" width="80" height="80"/%3E%3C/svg%3E'
+                        }}
+                      />
+                      {/* Selected state overlay */}
+                      {selectedIndex === imageIndex && (
+                        <div className="absolute inset-0 bg-emerald-500/5"></div>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            
+            {/* Labels row */}
+            <div className="flex" style={{ gap: `${THUMBNAIL_GAP}px` }}>
+              {rowImages.map((image, colIndex) => {
+                const imageIndex = rowIndex * MAX_PER_ROW + colIndex
+                return (
+                  <div 
+                    key={imageIndex} 
+                    className="text-center"
+                    style={{ width: `${thumbnailSize}px` }}
+                  >
+                    <span className="text-[9px] font-medium text-neutral-700 block leading-tight truncate">
                       {ROOM_LABELS[imageIndex] || `Room ${imageIndex + 1}`}
                     </span>
                   </div>
-                </button>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         ))}
       </div>

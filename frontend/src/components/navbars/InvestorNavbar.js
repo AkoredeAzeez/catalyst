@@ -52,16 +52,16 @@ export function InvestorNavbar() {
   
   return (
     <header className="sticky top-0 z-40 border-b border-neutral-100 bg-white backdrop-blur-sm">
-      <div className="container mx-auto flex h-12 items-center justify-between px-4">
+      <div className="container mx-auto flex h-11 items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-neutral-100 flex items-center justify-center">
-              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-xs">
+            <div className="h-7 w-7 rounded-lg bg-neutral-100 flex items-center justify-center">
+              <div className="h-5 w-5 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-[10px]">
                 C
               </div>
             </div>
-            <span className="font-bold text-base text-neutral-900">Catalyst</span>
+            <span className="font-bold text-sm text-neutral-900">Catalyst</span>
           </Link>
         </div>
 

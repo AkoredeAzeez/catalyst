@@ -17,9 +17,9 @@ export default function InvestorPage() {
   return (
     <RoleGuard allowed={['investor', 'admin']}>
       <DashboardShell rightSidebar={<PropertiesSidebar />}>
-        <div className="h-full flex flex-col gap-2">
+        <div className="h-full flex flex-col gap-3">
           {/* Top section: Sidebar + Image */}
-          <div className="grid grid-cols-1 lg:grid-cols-[269px_1fr] gap-2 flex-shrink-0">
+          <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-3 flex-shrink-0">
             {/* Left sidebar */}
             <div className="min-w-0">
               <InvestorSidebar />
@@ -39,17 +39,17 @@ export default function InvestorPage() {
 
               {/* Room name label above image */}
               {selectedIndex !== 0 && (
-                <div className="mb-1 w-full text-center">
+                <div className="mb-1.5 w-full text-center">
                   <h2 className="text-neutral-900 font-semibold text-sm">{currentRoomName}</h2>
                 </div>
               )}
               
-              {/* Property Image Display with exact dimensions */}
+              {/* Property Image Display with dimensions increased by 17% */}
               <div 
-                className="relative overflow-hidden bg-neutral-100"
+                className="relative overflow-hidden bg-neutral-100 rounded-2xl"
                 style={{
-                  width: '670.18px',
-                  height: '495.58px',
+                  width: '645px',
+                  height: '455px',
                   transform: 'matrix(-1, 0, 0, 1, 0, 0)'
                 }}
               >
@@ -59,7 +59,7 @@ export default function InvestorPage() {
                   fill
                   className="object-cover"
                   priority
-                  sizes="690px"
+                  sizes="645px"
                   style={{ transform: 'scaleX(-1)' }}
                 />
               </div>

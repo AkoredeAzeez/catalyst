@@ -44,14 +44,14 @@ export function PropertiesSidebar() {
       <div className="space-y-4">
         {/* Buy/Sell buttons */}
         <div className="flex items-center justify-end gap-2">
-          <Button className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none shadow-none text-sm px-4 py-2 h-9 font-medium rounded-lg">
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Button className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none shadow-md text-xs px-3 py-1.5 h-8 font-medium rounded-lg">
+            <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             Buy
           </Button>
-          <Button variant="outline" className="text-neutral-600 border-neutral-200 hover:bg-neutral-50 text-sm px-4 py-2 h-9 font-medium rounded-lg bg-white">
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Button variant="outline" className="text-neutral-600 border-neutral-200 hover:bg-neutral-50 text-xs px-3 py-1.5 h-8 font-medium rounded-lg bg-white shadow-md">
+            <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Sell
@@ -59,7 +59,7 @@ export function PropertiesSidebar() {
         </div>
 
         {/* My Properties section */}
-        <div className="bg-white rounded-xl border border-neutral-100 p-4 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold text-neutral-900">My Properties</h2>
             <select 
@@ -76,9 +76,9 @@ export function PropertiesSidebar() {
           {/* Property cards */}
           <div className="space-y-3">
             {filteredProperties.map(property => (
-              <div key={property.id} className="bg-white rounded-xl border border-neutral-100 overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer">
+              <div key={property.id} className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-200 cursor-pointer">
                 {/* Property Image */}
-                <div className="relative h-32 w-full bg-neutral-100">
+                <div className="relative h-40 w-full bg-neutral-100">
                   <img 
                     src={property.image} 
                     alt={property.title}
@@ -90,21 +90,21 @@ export function PropertiesSidebar() {
                 </div>
 
                 {/* Property Details */}
-                <div className="p-3">
+                <div className="p-3.5">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-base font-bold text-neutral-900">
                       ${property.price.toLocaleString()} <span className="text-xs font-normal text-neutral-500">/ month</span>
                     </div>
-                    <Badge className={`text-[10px] px-2 py-1 font-semibold rounded-md ${property.status === 'Occupied' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-yellow-100 text-yellow-700 border-yellow-200'}`}>
+                    <Badge className={`text-[10px] px-2.5 py-1 font-semibold rounded-lg ${property.status === 'Occupied' ? 'bg-emerald-100 text-emerald-700' : 'bg-yellow-100 text-yellow-700'}`}>
                       {property.status}
                     </Badge>
                   </div>
 
-                  <h3 className="font-semibold text-sm text-neutral-900 mb-1">{property.title}</h3>
-                  <p className="text-xs text-neutral-500 mb-3">{property.address}</p>
+                  <h3 className="font-semibold text-sm text-neutral-900 mb-1.5">{property.title}</h3>
+                  <p className="text-xs text-neutral-500 mb-3.5">{property.address}</p>
 
                   {/* Property Stats */}
-                  <div className="flex items-center gap-3 text-xs text-neutral-600 font-medium">
+                  <div className="flex items-center justify-between text-xs text-neutral-600 font-medium pt-3 border-t border-neutral-100">
                     <div className="flex items-center gap-1.5">
                       <svg className="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
