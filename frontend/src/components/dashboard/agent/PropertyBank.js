@@ -3,9 +3,22 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import AgentSidebar from '@/components/sidebars/AgentSidebar'
 
 function PropertyCard({ property }) {
+  const router = useRouter()
+
+  const handleViewProperty = () => {
+    // Navigate to property details page
+    router.push(`/dashboard/agent/properties/${property.id}`)
+  }
+
+  const handleEditProperty = () => {
+    // Navigate to property edit page
+    router.push(`/dashboard/agent/properties/${property.id}/edit`)
+  }
+
   return (
     <Card className="rounded-2xl bg-white border border-neutral-200 overflow-hidden hover:shadow-sm transition-shadow w-[302px]">
       <CardContent className="p-0">
@@ -70,10 +83,16 @@ function PropertyCard({ property }) {
 
           {/* Action Buttons */}
           <div className="flex gap-1.5">
-            <button className="flex-1 bg-white text-neutral-900 border border-neutral-300 rounded-lg py-1.5 text-[10px] font-semibold hover:bg-neutral-50 transition-colors">
+            <button 
+              onClick={handleViewProperty}
+              className="flex-1 bg-white text-neutral-900 border border-neutral-300 rounded-lg py-1.5 text-[10px] font-semibold hover:bg-neutral-50 transition-colors"
+            >
               View Properties
             </button>
-            <button className="px-2.5 py-1.5 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors">
+            <button 
+              onClick={handleEditProperty}
+              className="px-2.5 py-1.5 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
+            >
               <svg className="w-3.5 h-3.5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
@@ -159,7 +178,13 @@ export default function PropertyBank() {
         </div>
 
         {/* Property Grid with Border */}
-        <div className="border border-neutral-200 rounded-2xl p-4">
+        <div 
+          className="border border-neutral-200 rounded-2xl p-4 h-[884px] overflow-y-auto scrollbar-hide"
+          style={{
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none'
+          }}
+        >
           {loading ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
