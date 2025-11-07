@@ -34,17 +34,22 @@
     <div class="help">Drag to look • Click hotspot to move • Pinch/scroll to zoom</div>
   </div>
 
-  <!-- Three.js as ES modules -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
   <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     // ==========================
     // 1) CONFIGURE YOUR TOUR 👇
     // ==========================
-    // Put your 360 equirectangular images in ./assets and update paths below.
-    // yaw: degrees left/right (0 faces forward, +right/-left),
-    // pitch: degrees up/down (+up/-down).
     const SCENES = {
       living: {
         name: 'Living Room',
@@ -86,174 +91,11 @@
       },
     };
 
-    // Choose which scene to start in
     const START_SCENE_KEY = 'living';
 
     // ==============
     // 2) BOILERPLATE
     // ==============
-    const app = document.querySelector('#app');
-  const [rooms, setRooms] = useState([]);
-  const [connections, setConnections] = useState([]);
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [startRoom, setStartRoom] = useState(null);
-  const [drawMode, setDrawMode] = useState(false);
-  const [fromRoom, setFromRoom] = useState(null);
-  const [preview, setPreview] = useState(false);
-  const canvasRef = useRef(null);
-
-  // Add a new room
-  const addRoom = () => {
-    const newRoom = {
-      id: Date.now(),
-      name: `Room ${rooms.length + 1}`,
-      image: null,
-      x: 100 + rooms.length * 150,
-      y: 100,
-      hotspots: [],
-    };
-    setRooms([...rooms, newRoom]);
-  };
-
-  // Update room
-  const updateRoom = (id, updates) => {
-    setRooms(rooms.map(r => r.id === id ? { ...r, ...updates } : r));
-  };
-
-  // Handle image upload
-  const handleImageUpload = (roomId, file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      updateRoom(roomId, { image: e.target.result });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Delete room
-  const deleteRoom = (id) => {
-    setRooms(rooms.filter(r => r.id !== id));
-    setConnections(connections.filter(c => c.from !== id && c.to !== id));
-    if (startRoom === id) setStartRoom(null);
-  };
-
-  // Draw mode - connect rooms
-  const startConnection = (roomId, e) => {
-    e.stopPropagation();
-    if (!drawMode) return;
-    setFromRoom(roomId);
-  };
-
-  const endConnection = (toRoomId, e) => {
-    e.stopPropagation();
-    if (!drawMode || !fromRoom || fromRoom === toRoomId) return;
-
-    // Check if connection already exists
-    const exists = connections.some(
-      c => (c.from === fromRoom && c.to === toRoomId) ||
-           (c.from === toRoomId && c.to === fromRoom)
-    );
-
-    if (!exists) {
-      setConnections([
-        ...connections,
-        {
-          id: Date.now(),
-          from: fromRoom,
-          to: toRoomId,
-          label: '',
-        },
-      ]);
-    }
-    setFromRoom(null);
-  };
-
-  // Delete connection
-  const deleteConnection = (connId) => {
-    setConnections(connections.filter(c => c.id !== connId));
-  };
-
-  // Generate tour HTML
-  const generateTourHTML = () => {
-    const roomMap = {};
-    rooms.forEach(room => {
-      roomMap[room.id] = room;
-    });
-
-    const sceneConfig = {};
-    rooms.forEach(room => {
-      const roomConnections = connections.filter(c => c.from === room.id || c.to === room.id);
-      const hotspots = [];
-
-      roomConnections.forEach((conn, idx) => {
-        const targetId = conn.from === room.id ? conn.to : conn.from;
-        const targetRoom = roomMap[targetId];
-        hotspots.push({
-          id: `to${targetRoom.name.replace(/\s+/g, '')}${idx}`,
-          label: `To ${targetRoom.name}`,
-          yaw: (idx * 90) % 360,
-          pitch: -2,
-          target: targetRoom.name.toLowerCase().replace(/\s+/g, '_'),
-        });
-      });
-
-      sceneConfig[room.name.toLowerCase().replace(/\s+/g, '_')] = {
-        name: room.name,
-        image: room.image,
-        hotspots: hotspots,
-      };
-    });
-
-    const htmlTemplate = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>360° Virtual Tour</title>
-  <style>
-    html, body { height: 100%; margin: 0; overflow: hidden; background: #0b0b0c; }
-    #app { position: fixed; inset: 0; }
-    canvas { display: block; }
-    .hud { position: fixed; left: 12px; bottom: 12px; color: #e6e6e6; font-family: system-ui; }
-    .hud .pill { display: inline-block; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
-    .hud .scene { font-weight: 600; }
-    .hud .help { margin-top: 6px; font-size: 12px; opacity: .8; }
-    .topright { position: fixed; right: 12px; top: 12px; display: flex; gap: 8px; }
-    .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); color: #e6e6e6; background: rgba(255,255,255,.06); cursor: pointer; }
-    .btn:hover { background: rgba(255,255,255,.10); }
-    .hotspot-hover { cursor: pointer !important; }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
-  <div class="topright">
-    <button class="btn" id="resetView">Reset View</button>
-    <button class="btn" id="toggleLabels">Toggle Labels</button>
-  </div>
-  <div class="hud">
-    <div class="pill"><span>Room:</span> <span class="scene" id="sceneName">—</span></div>
-    <div class="help">Drag to look • Click hotspot to move • Pinch/scroll to zoom</div>
-  </div>
-
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-    const SCENES = ${JSON.stringify(sceneConfig, null, 2).replace(/"image":"data:/g, '"image":"').replace(/"image":"[^"]*"/g, match => {
-      const base64 = Object.values(sceneConfig)[0]?.image;
-      return base64 ? `"image":"${base64}"` : '"image":""';
-    })};
-
-    const START_SCENE_KEY = '${Object.keys(sceneConfig)[0] || 'living'}';
-
     const app = document.querySelector('#app');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 2000);
@@ -302,12 +144,17 @@
     function loadTexture(url) {
       return new Promise((resolve, reject) => {
         if (textureCache.has(url)) return resolve(textureCache.get(url));
-        textureLoader.load(url, tex => {
-          tex.colorSpace = THREE.SRGBColorSpace;
-          tex.minFilter = THREE.LinearFilter;
-          textureCache.set(url, tex);
-          resolve(tex);
-        }, undefined, err => reject(err));
+        textureLoader.load(
+          url,
+          tex => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.minFilter = THREE.LinearFilter;
+            textureCache.set(url, tex);
+            resolve(tex);
+          },
+          undefined,
+          err => reject(err)
+        );
       });
     }
 
@@ -360,7 +207,7 @@
 
     function makeLabelTexture(text) {
       const padX = 24, padY = 12;
-      const font = '500 32px system-ui';
+      const font = '500 32px system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial';
       const c = document.createElement('canvas');
       const ctx = c.getContext('2d');
       ctx.font = font;
@@ -505,6 +352,11 @@
       }
     }, { passive: true });
 
+    (async function preloadAll() {
+      const urls = Object.values(SCENES).map(s => s.image);
+      await Promise.all(urls.map(u => loadTexture(u).catch(() => null)));
+    })();
+
     document.getElementById('resetView').addEventListener('click', () => {
       controls.reset();
       controls.target.set(0, 0, 0);
@@ -527,204 +379,4 @@
     })();
   </script>
 </body>
-</html>`;
-
-    return htmlTemplate;
-  };
-
-  // Download tour
-  const downloadTour = () => {
-    if (rooms.length === 0) {
-      alert('Please add at least one room');
-      return;
-    }
-    const html = generateTourHTML();
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'virtual-tour.html';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  if (preview) {
-    return (
-      <div className="w-full h-screen bg-gray-900 text-white p-4">
-        <button
-          onClick={() => setPreview(false)}
-          className="mb-4 px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
-        >
-          ← Back to Editor
-        </button>
-        <div className="text-center p-8 bg-gray-800 rounded">
-          <p className="mb-4">Preview HTML generated successfully! Download to view the tour.</p>
-          <button
-            onClick={downloadTour}
-            className="px-6 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center gap-2 mx-auto"
-          >
-            <Download size={18} /> Download Tour
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Virtual Tour Builder</h1>
-          <div className="flex gap-3">
-            <button
-              onClick={addRoom}
-              className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 flex items-center gap-2"
-            >
-              <Plus size={18} /> Add Room
-            </button>
-            <button
-              onClick={() => setDrawMode(!drawMode)}
-              className={`px-4 py-2 rounded flex items-center gap-2 ${
-                drawMode ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-700 hover:bg-gray-600'
-              }`}
-            >
-              <ArrowRight size={18} /> {drawMode ? 'Drawing' : 'Draw Mode'}
-            </button>
-            <button
-              onClick={() => setPreview(true)}
-              className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 flex items-center gap-2"
-              disabled={rooms.length === 0}
-            >
-              <Play size={18} /> Preview
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Rooms List */}
-          <div className="lg:col-span-2">
-            <div className="bg-gray-800 rounded-lg p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Rooms</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {rooms.map(room => (
-                  <div
-                    key={room.id}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition ${
-                      selectedRoom?.id === room.id
-                        ? 'border-blue-500 bg-gray-700'
-                        : 'border-gray-600 bg-gray-750 hover:border-gray-500'
-                    }`}
-                    onClick={() => setSelectedRoom(room)}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold">{room.name}</h3>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteRoom(room.id);
-                        }}
-                        className="text-red-500 hover:text-red-400"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                    {room.image ? (
-                      <img src={room.image} alt={room.name} className="w-full h-32 object-cover rounded mb-2" />
-                    ) : (
-                      <div className="w-full h-32 bg-gray-600 rounded mb-2 flex items-center justify-center text-gray-400">
-                        No image
-                      </div>
-                    )}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setStartRoom(room.id);
-                      }}
-                      className={`w-full py-1 rounded text-sm ${
-                        startRoom === room.id
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-600 hover:bg-gray-500'
-                      }`}
-                    >
-                      {startRoom === room.id ? '★ Start Room' : 'Set as Start'}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Connections */}
-            {connections.length > 0 && (
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Connections</h2>
-                <div className="space-y-2">
-                  {connections.map(conn => {
-                    const fromRoom = rooms.find(r => r.id === conn.from);
-                    const toRoom = rooms.find(r => r.id === conn.to);
-                    return (
-                      <div key={conn.id} className="flex justify-between items-center p-3 bg-gray-700 rounded">
-                        <span>
-                          {fromRoom?.name} ↔ {toRoom?.name}
-                        </span>
-                        <button
-                          onClick={() => deleteConnection(conn.id)}
-                          className="text-red-500 hover:text-red-400"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Room Editor */}
-          {selectedRoom && (
-            <div className="bg-gray-800 rounded-lg p-6 sticky top-6 h-fit">
-              <h2 className="text-xl font-semibold mb-4">Edit Room</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Room Name</label>
-                  <input
-                    type="text"
-                    value={selectedRoom.name}
-                    onChange={(e) => updateRoom(selectedRoom.id, { name: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Upload Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        handleImageUpload(selectedRoom.id, e.target.files[0]);
-                      }
-                    }}
-                    className="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600"
-                  />
-                </div>
-                {selectedRoom.image && (
-                  <img src={selectedRoom.image} alt="preview" className="w-full h-40 object-cover rounded" />
-                )}
-                <div className="text-xs text-gray-400 p-3 bg-gray-700 rounded">
-                  <p className="font-semibold mb-2">Instructions:</p>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>Rename your room</li>
-                    <li>Upload 360° image</li>
-                    <li>Enable "Draw Mode"</li>
-                    <li>Click this room, then click another to connect</li>
-                    <li>Connections work both ways</li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+</html>
