@@ -1,98 +1,9 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Three.js 360° Virtual Tour (Hotspots + Crossfade)</title>
-  <style>
-    html, body { height: 100%; margin: 0; overflow: hidden; background: #0b0b0c; }
-    #app { position: fixed; inset: 0; }
-    canvas { display: block; }
+'use client';
 
-    /* Minimal UI */
-    .hud { position: fixed; left: 12px; bottom: 12px; color: #e6e6e6; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-    .hud .pill { display: inline-block; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(6px); }
-    .hud .scene { font-weight: 600; }
-    .hud .help { margin-top: 6px; font-size: 12px; opacity: .8; }
+import React, { useState } from 'react';
+import { Plus, Trash2, ArrowRight, Download, Play } from 'lucide-react';
 
-    .topright { position: fixed; right: 12px; top: 12px; display: flex; gap: 8px; }
-    .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); color: #e6e6e6; background: rgba(255,255,255,.06); cursor: pointer; }
-    .btn:hover { background: rgba(255,255,255,.10); }
-
-    /* Pointer cue when hovering hotspots */
-    .hotspot-hover { cursor: pointer !important; }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
-  <div class="topright">
-    <button class="btn" id="resetView">Reset View</button>
-    <button class="btn" id="toggleLabels">Toggle Labels</button>
-  </div>
-  <div class="hud">
-    <div class="pill"><span>Room:</span> <span class="scene" id="sceneName">—</span></div>
-    <div class="help">Drag to look • Click hotspot to move • Pinch/scroll to zoom</div>
-  </div>
-
-  <!-- Three.js as ES modules -->
-  <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-
-    // ==========================
-    // 1) CONFIGURE YOUR TOUR 👇
-    // ==========================
-    // Put your 360 equirectangular images in ./assets and update paths below.
-    // yaw: degrees left/right (0 faces forward, +right/-left),
-    // pitch: degrees up/down (+up/-down).
-    const SCENES = {
-      living: {
-        name: 'Living Room',
-        image: './assets/img1.jpg',
-        hotspots: [
-          { id: 'toKitchen', label: 'Go to Kitchen', yaw: 35, pitch: -2, target: 'kitchen' },
-          { id: 'toHall',    label: 'To Hallway',    yaw: -120, pitch: -3, target: 'hall' },
-        ],
-      },
-      kitchen: {
-        name: 'Kitchen',
-        image: './assets/img2.jpg',
-        hotspots: [
-          { id: 'toLiving',  label: 'Back to Living', yaw: -145, pitch: -1, target: 'living' },
-          { id: 'toDining',  label: 'Dining',         yaw: 10, pitch: -2,  target: 'dining' },
-        ],
-      },
-      hall: {
-        name: 'Hallway',
-        image: './assets/img3.jpg',
-        hotspots: [
-          { id: 'toLiving', label: 'Living', yaw: 60, pitch: 0, target: 'living' },
-          { id: 'toBedroom', label: 'Bedroom', yaw: -30, pitch: -4, target: 'bedroom' },
-        ],
-      },
-      dining: {
-        name: 'Dining',
-        image: './assets/img4.jpg',
-        hotspots: [
-          { id: 'toKitchen', label: 'Kitchen', yaw: -170, pitch: -2, target: 'kitchen' },
-        ],
-      },
-      bedroom: {
-        name: 'Bedroom',
-        image: './assets/img5.jpg',
-        hotspots: [
-          { id: 'toHall', label: 'Hall', yaw: 140, pitch: -3, target: 'hall' },
-        ],
-      },
-    };
-
-    // Choose which scene to start in
-    const START_SCENE_KEY = 'living';
-
-    // ==============
-    // 2) BOILERPLATE
-    // ==============
-    const app = document.querySelector('#app');
+export default function TourBuilder() {
   const [rooms, setRooms] = useState([]);
   const [connections, setConnections] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -100,7 +11,6 @@
   const [drawMode, setDrawMode] = useState(false);
   const [fromRoom, setFromRoom] = useState(null);
   const [preview, setPreview] = useState(false);
-  const canvasRef = useRef(null);
 
   // Add a new room
   const addRoom = () => {
@@ -108,8 +18,6 @@
       id: Date.now(),
       name: `Room ${rooms.length + 1}`,
       image: null,
-      x: 100 + rooms.length * 150,
-      y: 100,
       hotspots: [],
     };
     setRooms([...rooms, newRoom]);
@@ -136,35 +44,31 @@
     if (startRoom === id) setStartRoom(null);
   };
 
-  // Draw mode - connect rooms
-  const startConnection = (roomId, e) => {
-    e.stopPropagation();
+  // Connect rooms
+  const connectRooms = (roomId) => {
     if (!drawMode) return;
-    setFromRoom(roomId);
-  };
+    
+    if (!fromRoom) {
+      setFromRoom(roomId);
+    } else if (fromRoom !== roomId) {
+      const exists = connections.some(
+        c => (c.from === fromRoom && c.to === roomId) ||
+             (c.from === roomId && c.to === fromRoom)
+      );
 
-  const endConnection = (toRoomId, e) => {
-    e.stopPropagation();
-    if (!drawMode || !fromRoom || fromRoom === toRoomId) return;
-
-    // Check if connection already exists
-    const exists = connections.some(
-      c => (c.from === fromRoom && c.to === toRoomId) ||
-           (c.from === toRoomId && c.to === fromRoom)
-    );
-
-    if (!exists) {
-      setConnections([
-        ...connections,
-        {
-          id: Date.now(),
-          from: fromRoom,
-          to: toRoomId,
-          label: '',
-        },
-      ]);
+      if (!exists) {
+        setConnections([
+          ...connections,
+          {
+            id: Date.now(),
+            from: fromRoom,
+            to: roomId,
+            label: '',
+          },
+        ]);
+      }
+      setFromRoom(null);
     }
-    setFromRoom(null);
   };
 
   // Delete connection
@@ -203,6 +107,17 @@
       };
     });
 
+    const startKey = startRoom ? rooms.find(r => r.id === startRoom)?.name.toLowerCase().replace(/\s+/g, '_') : Object.keys(sceneConfig)[0];
+
+    // Create a proper JS object instead of JSON string for images
+    const scenesCode = Object.entries(sceneConfig).map(([key, val]) => {
+      return `'${key}': {
+        name: '${val.name}',
+        image: '${val.image}',
+        hotspots: ${JSON.stringify(val.hotspots)}
+      }`;
+    }).join(',\n');
+
     const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -214,7 +129,7 @@
     #app { position: fixed; inset: 0; }
     canvas { display: block; }
     .hud { position: fixed; left: 12px; bottom: 12px; color: #e6e6e6; font-family: system-ui; }
-    .hud .pill { display: inline-block; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+    .hud .pill { display: inline-block; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(6px); }
     .hud .scene { font-weight: 600; }
     .hud .help { margin-top: 6px; font-size: 12px; opacity: .8; }
     .topright { position: fixed; right: 12px; top: 12px; display: flex; gap: 8px; }
@@ -234,25 +149,14 @@
     <div class="help">Drag to look • Click hotspot to move • Pinch/scroll to zoom</div>
   </div>
 
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-
   <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
-    const SCENES = ${JSON.stringify(sceneConfig, null, 2).replace(/"image":"data:/g, '"image":"').replace(/"image":"[^"]*"/g, match => {
-      const base64 = Object.values(sceneConfig)[0]?.image;
-      return base64 ? `"image":"${base64}"` : '"image":""';
-    })};
-
-    const START_SCENE_KEY = '${Object.keys(sceneConfig)[0] || 'living'}';
+    const SCENES = {
+      ${scenesCode}
+    };
+    const START_SCENE_KEY = '${startKey}';
 
     const app = document.querySelector('#app');
     const scene = new THREE.Scene();
@@ -280,22 +184,18 @@
 
     const SPHERE_RADIUS = 50;
     const sphereGeo = new THREE.SphereGeometry(SPHERE_RADIUS, 64, 64);
-
     const matA = new THREE.MeshBasicMaterial({ side: THREE.BackSide, transparent: true, opacity: 1 });
     const matB = new THREE.MeshBasicMaterial({ side: THREE.BackSide, transparent: true, opacity: 0 });
-
     const sphereA = new THREE.Mesh(sphereGeo, matA);
     const sphereB = new THREE.Mesh(sphereGeo, matB);
     scene.add(sphereA, sphereB);
 
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-
     const hotspotGroup = new THREE.Group();
     scene.add(hotspotGroup);
 
     let labelsVisible = true;
-
     const textureLoader = new THREE.TextureLoader();
     const textureCache = new Map();
 
@@ -318,26 +218,6 @@
       const y = Math.sin(pitch) * radius;
       const z = -Math.cos(yaw) * Math.cos(pitch) * radius;
       return new THREE.Vector3(x, y, z);
-    }
-
-    function makeHotspot(labelText = '') {
-      const group = new THREE.Group();
-
-      const dotMat = new THREE.SpriteMaterial({ map: makeCircleTexture(), depthTest: true, depthWrite: false, opacity: 0.95 });
-      const dot = new THREE.Sprite(dotMat);
-      dot.scale.set(1.2, 1.2, 1.2);
-      group.add(dot);
-
-      const label = new THREE.Mesh(
-        new THREE.PlaneGeometry(4, 1.2),
-        new THREE.MeshBasicMaterial({ map: makeLabelTexture(labelText), transparent: true })
-      );
-      label.position.set(0, -2.2, 0);
-      label.renderOrder = 999;
-      group.add(label);
-
-      group.userData = { isHotspot: true, labelMesh: label };
-      return group;
     }
 
     function makeCircleTexture() {
@@ -370,10 +250,18 @@
       c.width = w; c.height = h;
       ctx.font = font;
       ctx.fillStyle = 'rgba(20,20,24,0.7)';
-      roundRect(ctx, 0, 0, w, h, 18);
+      ctx.beginPath();
+      const r = 18;
+      ctx.moveTo(0+r, 0);
+      ctx.arcTo(w, 0, w, h, r);
+      ctx.arcTo(w, h, 0, h, r);
+      ctx.arcTo(0, h, 0, 0, r);
+      ctx.arcTo(0, 0, w, 0, r);
+      ctx.closePath();
       ctx.fill();
       ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-      ctx.lineWidth = 2; ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.stroke();
       ctx.fillStyle = '#eaeaea';
       ctx.textBaseline = 'middle';
       ctx.fillText(text, padX, h/2);
@@ -383,14 +271,21 @@
       return tex;
     }
 
-    function roundRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x+r, y);
-      ctx.arcTo(x+w, y, x+w, y+h, r);
-      ctx.arcTo(x+w, y+h, x, y+h, r);
-      ctx.arcTo(x, y+h, x, y, r);
-      ctx.arcTo(x, y, x+w, y, r);
-      ctx.closePath();
+    function makeHotspot(labelText = '') {
+      const group = new THREE.Group();
+      const dotMat = new THREE.SpriteMaterial({ map: makeCircleTexture(), depthTest: true, depthWrite: false, opacity: 0.95 });
+      const dot = new THREE.Sprite(dotMat);
+      dot.scale.set(1.2, 1.2, 1.2);
+      group.add(dot);
+      const label = new THREE.Mesh(
+        new THREE.PlaneGeometry(4, 1.2),
+        new THREE.MeshBasicMaterial({ map: makeLabelTexture(labelText), transparent: true })
+      );
+      label.position.set(0, -2.2, 0);
+      label.renderOrder = 999;
+      group.add(label);
+      group.userData = { isHotspot: true, labelMesh: label };
+      return group;
     }
 
     function buildHotspots(sceneKey) {
@@ -429,25 +324,23 @@
         const tex = await loadTexture(def.image);
         setSceneName(def.name);
         buildHotspots(sceneKey);
-
         if (activeOnA) {
           matB.map = tex; matB.needsUpdate = true;
         } else {
           matA.map = tex; matA.needsUpdate = true;
         }
-
         isFading = true;
         const t0 = performance.now();
         const dur = options.fadeMs ?? 600;
         function step(now) {
           const k = Math.min(1, (now - t0) / dur);
           if (activeOnA) { matA.opacity = 1 - k; matB.opacity = k; }
-          else            { matA.opacity = k;     matB.opacity = 1 - k; }
+          else { matA.opacity = k; matB.opacity = 1 - k; }
           if (k < 1) requestAnimationFrame(step);
           else {
             activeOnA = !activeOnA;
             if (activeOnA) { matB.opacity = 0; }
-            else           { matA.opacity = 0; }
+            else { matA.opacity = 0; }
             isFading = false;
           }
         }
@@ -458,7 +351,7 @@
     }
 
     function updateHoverCursor(clientX, clientY) {
-      pointer.x =  (clientX / window.innerWidth) * 2 - 1;
+      pointer.x = (clientX / window.innerWidth) * 2 - 1;
       pointer.y = -(clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
       const hits = raycaster.intersectObjects(hotspotGroup.children, true);
@@ -471,7 +364,7 @@
 
     function handleSelect(clientX, clientY) {
       if (isFading) return;
-      pointer.x =  (clientX / window.innerWidth) * 2 - 1;
+      pointer.x = (clientX / window.innerWidth) * 2 - 1;
       pointer.y = -(clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
       const hits = raycaster.intersectObjects(hotspotGroup.children, true);
@@ -497,7 +390,6 @@
 
     renderer.domElement.addEventListener('mousemove', e => updateHoverCursor(e.clientX, e.clientY));
     renderer.domElement.addEventListener('click', e => handleSelect(e.clientX, e.clientY));
-
     renderer.domElement.addEventListener('touchstart', e => {
       if (e.touches.length === 1) {
         const t = e.touches[0];
@@ -511,6 +403,7 @@
       camera.position.set(0, 0, 0.1);
       controls.update();
     });
+
     document.getElementById('toggleLabels').addEventListener('click', () => {
       labelsVisible = !labelsVisible;
       setLabelsVisible(labelsVisible);
@@ -521,7 +414,6 @@
       blackTex.needsUpdate = true;
       matA.map = blackTex; matA.needsUpdate = true; matA.opacity = 1;
       matB.opacity = 0;
-
       await switchScene(START_SCENE_KEY, { fadeMs: 400 });
       animate();
     })();
@@ -588,7 +480,7 @@
                 drawMode ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-700 hover:bg-gray-600'
               }`}
             >
-              <ArrowRight size={18} /> {drawMode ? 'Drawing' : 'Draw Mode'}
+              <ArrowRight size={18} /> {drawMode ? 'Drawing Mode' : 'Draw Mode'}
             </button>
             <button
               onClick={() => setPreview(true)}
@@ -613,8 +505,14 @@
                       selectedRoom?.id === room.id
                         ? 'border-blue-500 bg-gray-700'
                         : 'border-gray-600 bg-gray-750 hover:border-gray-500'
-                    }`}
-                    onClick={() => setSelectedRoom(room)}
+                    } ${drawMode && fromRoom === room.id ? 'ring-2 ring-green-500' : ''}`}
+                    onClick={() => {
+                      if (drawMode) {
+                        connectRooms(room.id);
+                      } else {
+                        setSelectedRoom(room);
+                      }
+                    }}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-semibold">{room.name}</h3>
@@ -681,7 +579,7 @@
           </div>
 
           {/* Room Editor */}
-          {selectedRoom && (
+          {selectedRoom && !drawMode && (
             <div className="bg-gray-800 rounded-lg p-6 sticky top-6 h-fit">
               <h2 className="text-xl font-semibold mb-4">Edit Room</h2>
               <div className="space-y-4">
@@ -690,12 +588,15 @@
                   <input
                     type="text"
                     value={selectedRoom.name}
-                    onChange={(e) => updateRoom(selectedRoom.id, { name: e.target.value })}
+                    onChange={(e) => {
+                      updateRoom(selectedRoom.id, { name: e.target.value });
+                      setSelectedRoom({ ...selectedRoom, name: e.target.value });
+                    }}
                     className="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Upload Image</label>
+                  <label className="block text-sm font-medium mb-2">Upload 360° Image</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -714,12 +615,34 @@
                   <p className="font-semibold mb-2">Instructions:</p>
                   <ol className="list-decimal list-inside space-y-1">
                     <li>Rename your room</li>
-                    <li>Upload 360° image</li>
-                    <li>Enable "Draw Mode"</li>
-                    <li>Click this room, then click another to connect</li>
-                    <li>Connections work both ways</li>
+                    <li>Upload 360° equirectangular image</li>
+                    <li>Enable "Draw Mode" to connect rooms</li>
+                    <li>Click this room, then another to connect</li>
+                    <li>Set a start room before generating</li>
                   </ol>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {drawMode && (
+            <div className="bg-gray-800 rounded-lg p-6 sticky top-6 h-fit">
+              <h2 className="text-xl font-semibold mb-4">Draw Mode Active</h2>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-300">
+                  {fromRoom 
+                    ? '✅ First room selected. Click another room to connect.'
+                    : 'Click a room to start connecting.'}
+                </p>
+                <button
+                  onClick={() => {
+                    setDrawMode(false);
+                    setFromRoom(null);
+                  }}
+                  className="w-full px-4 py-2 bg-red-600 rounded hover:bg-red-700"
+                >
+                  Exit Draw Mode
+                </button>
               </div>
             </div>
           )}

@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, FileText, CreditCard, Users, BarChart } from 'lucide-react'
+import { Home, FileText, CreditCard, Users, BarChart, Camera } from 'lucide-react'
 
 export default function AdminSidebar() {
   return (
@@ -14,6 +14,7 @@ export default function AdminSidebar() {
           <SidebarLink href="/payments" icon={CreditCard}>Payments</SidebarLink>
           <SidebarLink href="/dashboard/admin/properties" icon={BarChart}>Properties</SidebarLink>
           <SidebarLink href="/dashboard/admin/tenants" icon={Users}>Tenants</SidebarLink>
+          <SidebarLink href="/dashboard/admin/tour-builder" icon={Camera}>Tour Builder</SidebarLink>
           <SidebarLink href="/dashboard/admin/reports" icon={FileText}>Reports</SidebarLink>
         </nav>
       </div>
