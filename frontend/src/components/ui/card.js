@@ -1,6 +1,6 @@
 export function Card({ children, className = '' }) {
   // subtle border and soft shadow to mimic the design
-  return <div className={`rounded-lg bg-white border border-neutral-100 shadow-sm ${className}`}>{children}</div>
+  return <div className={`rounded-lg bg-white border border-neutral-100 ${className}`}>{children}</div>
 }
 
 export function CardHeader({ children, className = '' }) {

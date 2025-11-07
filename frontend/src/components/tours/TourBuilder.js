@@ -45,7 +45,31 @@ export default function TourBuilder() {
   const handleImageUpload = (roomId, file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      updateRoom(roomId, { image: e.target.result });
+      const img = new Image();
+      img.onload = () => {
+        // Standard dimensions for all 360° images
+        const TARGET_WIDTH = 2048;
+        const TARGET_HEIGHT = 1024;
+        
+        // Create canvas with target dimensions
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = TARGET_WIDTH;
+        canvas.height = TARGET_HEIGHT;
+        
+        // Draw image with high quality settings, resizing to target dimensions
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+        
+        // Convert to data URL with high quality (0.95 = 95%)
+        const highQualityDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        updateRoom(roomId, { image: highQualityDataUrl });
+        
+        console.log(`Image converted: ${img.width}x${img.height} → ${TARGET_WIDTH}x${TARGET_HEIGHT}`);
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   };
@@ -90,7 +114,7 @@ export default function TourBuilder() {
   };
 
   // Generate tour HTML
-  const generateTourHTML = useCallback((isEditMode = false) => {
+  const generateTourHTML = useCallback((isEditMode = false, editingRoomIdParam = null) => {
     const roomMap = {};
     rooms.forEach(room => {
       roomMap[room.id] = room;
@@ -126,7 +150,14 @@ export default function TourBuilder() {
       };
     });
 
-    const startKey = startRoom ? rooms.find(r => r.id === startRoom)?.name.toLowerCase().replace(/\s+/g, '_') : Object.keys(sceneConfig)[0];
+    // In edit mode, start with the room being edited
+    let startKey;
+    if (isEditMode && editingRoomIdParam) {
+      const editingRoom = rooms.find(r => r.id === editingRoomIdParam);
+      startKey = editingRoom ? editingRoom.name.toLowerCase().replace(/\s+/g, '_') : Object.keys(sceneConfig)[0];
+    } else {
+      startKey = startRoom ? rooms.find(r => r.id === startRoom)?.name.toLowerCase().replace(/\s+/g, '_') : Object.keys(sceneConfig)[0];
+    }
 
     // Build SCENES object as string to properly handle base64 images
     const scenesEntries = Object.entries(sceneConfig).map(([key, val]) => {
@@ -140,11 +171,12 @@ export default function TourBuilder() {
     const hotspotPositions = {};
     let selectedHotspot = null;
     let isDraggingHotspot = false;
+    const EDITING_ROOM_ID = ${editingRoomIdParam || 'null'};
     
     window.saveHotspotPositions = function() {
       window.parent.postMessage({ type: 'HOTSPOT_POSITIONS', data: hotspotPositions }, '*');
     };
-    ` : 'const EDIT_MODE = false;';
+    ` : 'const EDIT_MODE = false; const EDITING_ROOM_ID = null;';
 
     const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
@@ -168,13 +200,18 @@ export default function TourBuilder() {
     ${isEditMode ? `
     .edit-banner { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(255,165,0,0.9); color: #000; padding: 12px 24px; border-radius: 8px; font-family: system-ui; font-weight: 600; z-index: 1000; }
     .hotspot-selected { filter: drop-shadow(0 0 10px #0ff) !important; }
+    .room-indicator { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 8px 16px; border-radius: 6px; font-family: system-ui; font-size: 14px; z-index: 1000; }
     ` : ''}
   </style>
 </head>
 <body>
   <div id="app"></div>
-  ${isEditMode ? '<div class="edit-banner">🎯 EDIT MODE - Drag hotspots to reposition them</div>' : ''}
+  ${isEditMode ? '<div class="edit-banner">🎯 EDIT MODE - Drag hotspots to reposition • Navigate to other rooms to edit their hotspots</div><div class="room-indicator" id="roomIndicator"></div>' : ''}
   <div class="topright">
+    <button class="btn" id="resetView">Reset View</button>
+    <button class="btn" id="toggleLabels">Toggle Labels</button>
+    ${isEditMode ? '<button class="btn" id="savePositions">💾 Save Positions</button>' : ''}
+  </div>
     <button class="btn" id="resetView">Reset View</button>
     <button class="btn" id="toggleLabels">Toggle Labels</button>
     ${isEditMode ? '<button class="btn" id="savePositions">💾 Save Positions</button>' : ''}
@@ -252,7 +289,10 @@ export default function TourBuilder() {
         if (textureCache.has(url)) return resolve(textureCache.get(url));
         textureLoader.load(url, tex => {
           tex.colorSpace = THREE.SRGBColorSpace;
-          tex.minFilter = THREE.LinearFilter;
+          tex.minFilter = THREE.LinearMipmapLinearFilter;
+          tex.magFilter = THREE.LinearFilter;
+          tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          tex.generateMipmaps = true;
           textureCache.set(url, tex);
           resolve(tex);
         }, undefined, err => reject(err));
@@ -372,7 +412,24 @@ export default function TourBuilder() {
     }
 
     const sceneNameEl = document.getElementById('sceneName');
-    function setSceneName(name) { sceneNameEl.textContent = name || '—'; }
+    function setSceneName(name) { 
+      sceneNameEl.textContent = name || '—'; 
+      
+      if (EDIT_MODE) {
+        const roomIndicator = document.getElementById('roomIndicator');
+        if (roomIndicator) {
+          const sceneData = SCENES[currentSceneKey];
+          const isEditingThisRoom = sceneData?.roomId === EDITING_ROOM_ID;
+          roomIndicator.textContent = isEditingThisRoom ? 
+            'Editing: ' + name : 
+            'Viewing: ' + name + ' (click hotspots to navigate)';
+          roomIndicator.style.background = isEditingThisRoom ? 
+            'rgba(255,165,0,0.9)' : 
+            'rgba(0,0,0,0.7)';
+          roomIndicator.style.color = isEditingThisRoom ? '#000' : '#fff';
+        }
+      }
+    }
 
     let activeOnA = true;
     let isFading = false;
@@ -652,7 +709,7 @@ export default function TourBuilder() {
     }
     setEditingRoomId(roomId);
     setEditMode(true);
-    const html = generateTourHTML(true);
+    const html = generateTourHTML(true, roomId);
     setTourPreview(html);
   };
 
@@ -883,6 +940,9 @@ export default function TourBuilder() {
                     }}
                     className="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600"
                   />
+                  <p className="text-xs text-gray-400 mt-1">
+                    💡 Auto-converts all images to 2048x1024 (2:1 ratio) for optimal performance
+                  </p>
                 </div>
                 {selectedRoom.image && (
                   <img src={selectedRoom.image} alt="preview" className="w-full h-40 object-cover rounded" />
