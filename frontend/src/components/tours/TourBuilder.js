@@ -14,6 +14,8 @@ export default function TourBuilder() {
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null); // 'success', 'error', or null
   const [tourPreview, setTourPreview] = useState(null); // For preview mode
+  const [editMode, setEditMode] = useState(false); // For hotspot editing
+  const [editingRoomId, setEditingRoomId] = useState(null); // Which room we're editing hotspots for
   const idCounter = useRef(1);
 
   // Generate unique ID
@@ -88,7 +90,7 @@ export default function TourBuilder() {
   };
 
   // Generate tour HTML
-  const generateTourHTML = useCallback(() => {
+  const generateTourHTML = useCallback((isEditMode = false) => {
     const roomMap = {};
     rooms.forEach(room => {
       roomMap[room.id] = room;
@@ -102,12 +104,17 @@ export default function TourBuilder() {
       roomConnections.forEach((conn, idx) => {
         const targetId = conn.from === room.id ? conn.to : conn.from;
         const targetRoom = roomMap[targetId];
+        
+        // Use stored hotspot positions if they exist
+        const storedHotspot = room.hotspots?.find(h => h.targetId === targetId);
+        
         hotspots.push({
           id: `to${targetRoom.name.replace(/\s+/g, '')}${idx}`,
           label: `To ${targetRoom.name}`,
-          yaw: (idx * 90) % 360,
-          pitch: -2,
+          yaw: storedHotspot?.yaw ?? (idx * 90) % 360,
+          pitch: storedHotspot?.pitch ?? -2,
           target: targetRoom.name.toLowerCase().replace(/\s+/g, '_'),
+          targetId: targetId, // Store the target room ID for reference
         });
       });
 
@@ -115,6 +122,7 @@ export default function TourBuilder() {
         name: room.name,
         image: room.image,
         hotspots: hotspots,
+        roomId: room.id, // Add room ID for edit mode
       };
     });
 
@@ -127,12 +135,23 @@ export default function TourBuilder() {
       return `'${key}': { name: '${val.name}', image: '${safeImage}', hotspots: ${hotspotsJson} }`;
     }).join(',\n      ');
 
+    const editModeScript = isEditMode ? `
+    const EDIT_MODE = true;
+    const hotspotPositions = {};
+    let selectedHotspot = null;
+    let isDraggingHotspot = false;
+    
+    window.saveHotspotPositions = function() {
+      window.parent.postMessage({ type: 'HOTSPOT_POSITIONS', data: hotspotPositions }, '*');
+    };
+    ` : 'const EDIT_MODE = false;';
+
     const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>360° Virtual Tour</title>
+  <title>360° Virtual Tour${isEditMode ? ' - Edit Mode' : ''}</title>
   <style>
     html, body { height: 100%; margin: 0; overflow: hidden; background: #0b0b0c; }
     #app { position: fixed; inset: 0; }
@@ -145,17 +164,24 @@ export default function TourBuilder() {
     .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); color: #e6e6e6; background: rgba(255,255,255,.06); cursor: pointer; }
     .btn:hover { background: rgba(255,255,255,.10); }
     .hotspot-hover { cursor: pointer !important; }
+    .hotspot-dragging { cursor: move !important; }
+    ${isEditMode ? `
+    .edit-banner { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(255,165,0,0.9); color: #000; padding: 12px 24px; border-radius: 8px; font-family: system-ui; font-weight: 600; z-index: 1000; }
+    .hotspot-selected { filter: drop-shadow(0 0 10px #0ff) !important; }
+    ` : ''}
   </style>
 </head>
 <body>
   <div id="app"></div>
+  ${isEditMode ? '<div class="edit-banner">🎯 EDIT MODE - Drag hotspots to reposition them</div>' : ''}
   <div class="topright">
     <button class="btn" id="resetView">Reset View</button>
     <button class="btn" id="toggleLabels">Toggle Labels</button>
+    ${isEditMode ? '<button class="btn" id="savePositions">💾 Save Positions</button>' : ''}
   </div>
   <div class="hud">
     <div class="pill"><span>Room:</span> <span class="scene" id="sceneName">—</span></div>
-    <div class="help">Drag to look • Click hotspot to move • Pinch/scroll to zoom</div>
+    <div class="help">${isEditMode ? 'Drag hotspots to move • Right-click to cancel' : 'Drag to look • Click hotspot to move • Pinch/scroll to zoom'}</div>
   </div>
 
   <script type="importmap">
@@ -171,10 +197,14 @@ export default function TourBuilder() {
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+    ${editModeScript}
+
     const SCENES = {
       ${scenesEntries}
     };
     const START_SCENE_KEY = '${startKey}';
+    
+    let currentSceneKey = START_SCENE_KEY;
 
     const app = document.querySelector('#app');
     const scene = new THREE.Scene();
@@ -308,6 +338,7 @@ export default function TourBuilder() {
 
     function buildHotspots(sceneKey) {
       hotspotGroup.clear();
+      currentSceneKey = sceneKey;
       const def = SCENES[sceneKey];
       if (!def?.hotspots) return;
       for (const h of def.hotspots) {
@@ -317,7 +348,17 @@ export default function TourBuilder() {
         hs.lookAt(0, 0, 0);
         hs.userData.target = h.target;
         hs.userData.labelText = h.label;
+        hs.userData.yaw = h.yaw;
+        hs.userData.pitch = h.pitch;
+        hs.userData.hotspotId = h.id;
+        hs.userData.targetId = h.targetId;
         hotspotGroup.add(hs);
+        
+        if (EDIT_MODE) {
+          // Store initial position for edit mode
+          if (!hotspotPositions[sceneKey]) hotspotPositions[sceneKey] = {};
+          hotspotPositions[sceneKey][h.id] = { yaw: h.yaw, pitch: h.pitch, targetId: h.targetId };
+        }
       }
       setLabelsVisible(labelsVisible);
     }
@@ -389,8 +430,80 @@ export default function TourBuilder() {
       const hit = hits.find(h => h.object?.parent?.userData?.isHotspot);
       if (hit) {
         const group = hit.object.parent;
-        const targetKey = group.userData.target;
-        if (targetKey && SCENES[targetKey]) switchScene(targetKey);
+        
+        if (EDIT_MODE) {
+          // In edit mode, select hotspot for dragging
+          selectedHotspot = group;
+          isDraggingHotspot = true;
+          renderer.domElement.classList.add('hotspot-dragging');
+          controls.enabled = false;
+          
+          // Highlight selected hotspot
+          hotspotGroup.children.forEach(h => {
+            h.children[0].material.opacity = h === group ? 1 : 0.5;
+          });
+        } else {
+          // Normal mode: navigate to target scene
+          const targetKey = group.userData.target;
+          if (targetKey && SCENES[targetKey]) switchScene(targetKey);
+        }
+      }
+    }
+    
+    function vec3ToYawPitch(vec) {
+      const r = Math.sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+      const pitch = Math.asin(vec.y / r) * 180 / Math.PI;
+      const yaw = Math.atan2(vec.x, -vec.z) * 180 / Math.PI;
+      return { yaw, pitch };
+    }
+    
+    function handleHotspotDrag(clientX, clientY) {
+      if (!EDIT_MODE || !isDraggingHotspot || !selectedHotspot) return;
+      
+      pointer.x = (clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      
+      // Cast ray to sphere surface
+      const sphere = scene.children.find(c => c.geometry?.type === 'SphereGeometry');
+      if (!sphere) return;
+      
+      const intersects = raycaster.intersectObject(sphere);
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        const { yaw, pitch } = vec3ToYawPitch(point);
+        
+        // Update hotspot position
+        const newPos = yawPitchToVec3(yaw, pitch);
+        selectedHotspot.position.copy(newPos);
+        selectedHotspot.lookAt(0, 0, 0);
+        
+        // Store updated position
+        selectedHotspot.userData.yaw = yaw;
+        selectedHotspot.userData.pitch = pitch;
+        
+        const hotspotId = selectedHotspot.userData.hotspotId;
+        if (!hotspotPositions[currentSceneKey]) hotspotPositions[currentSceneKey] = {};
+        hotspotPositions[currentSceneKey][hotspotId] = { 
+          yaw, 
+          pitch, 
+          targetId: selectedHotspot.userData.targetId 
+        };
+      }
+    }
+    
+    function handleDragEnd() {
+      if (EDIT_MODE && isDraggingHotspot) {
+        isDraggingHotspot = false;
+        renderer.domElement.classList.remove('hotspot-dragging');
+        controls.enabled = true;
+        
+        // Reset opacity for all hotspots
+        hotspotGroup.children.forEach(h => {
+          h.children[0].material.opacity = 0.95;
+        });
+        
+        selectedHotspot = null;
       }
     }
 
@@ -406,14 +519,31 @@ export default function TourBuilder() {
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    renderer.domElement.addEventListener('mousemove', e => updateHoverCursor(e.clientX, e.clientY));
+    renderer.domElement.addEventListener('mousemove', e => {
+      updateHoverCursor(e.clientX, e.clientY);
+      if (EDIT_MODE) handleHotspotDrag(e.clientX, e.clientY);
+    });
     renderer.domElement.addEventListener('click', e => handleSelect(e.clientX, e.clientY));
+    renderer.domElement.addEventListener('mouseup', () => handleDragEnd());
+    renderer.domElement.addEventListener('contextmenu', (e) => {
+      if (EDIT_MODE) {
+        e.preventDefault();
+        handleDragEnd();
+      }
+    });
     renderer.domElement.addEventListener('touchstart', e => {
       if (e.touches.length === 1) {
         const t = e.touches[0];
         updateHoverCursor(t.clientX, t.clientY);
       }
     }, { passive: true });
+    renderer.domElement.addEventListener('touchmove', e => {
+      if (EDIT_MODE && e.touches.length === 1) {
+        const t = e.touches[0];
+        handleHotspotDrag(t.clientX, t.clientY);
+      }
+    }, { passive: true });
+    renderer.domElement.addEventListener('touchend', () => handleDragEnd());
 
     document.getElementById('resetView').addEventListener('click', () => {
       controls.reset();
@@ -426,6 +556,12 @@ export default function TourBuilder() {
       labelsVisible = !labelsVisible;
       setLabelsVisible(labelsVisible);
     });
+    
+    if (EDIT_MODE) {
+      document.getElementById('savePositions')?.addEventListener('click', () => {
+        window.saveHotspotPositions();
+      });
+    }
 
     (async function init() {
       const blackTex = new THREE.DataTexture(new Uint8Array([0,0,0]), 1, 1);
@@ -504,17 +640,70 @@ export default function TourBuilder() {
       alert('Please add at least one room before previewing');
       return;
     }
-    const html = generateTourHTML();
+    const html = generateTourHTML(false);
     setTourPreview(html);
   };
+
+  // Edit hotspots mode
+  const editHotspots = (roomId) => {
+    if (rooms.length === 0) {
+      alert('Please add at least one room');
+      return;
+    }
+    setEditingRoomId(roomId);
+    setEditMode(true);
+    const html = generateTourHTML(true);
+    setTourPreview(html);
+  };
+
+  // Handle hotspot position updates from iframe
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data.type === 'HOTSPOT_POSITIONS') {
+        const positions = event.data.data;
+        
+        // Update rooms with new hotspot positions
+        setRooms(prevRooms => prevRooms.map(room => {
+          const roomKey = room.name.toLowerCase().replace(/\s+/g, '_');
+          const roomPositions = positions[roomKey];
+          
+          if (roomPositions) {
+            // Convert hotspot positions to array format
+            const updatedHotspots = Object.entries(roomPositions).map(([hotspotId, pos]) => ({
+              targetId: pos.targetId,
+              yaw: pos.yaw,
+              pitch: pos.pitch,
+            }));
+            
+            return { ...room, hotspots: updatedHotspots };
+          }
+          return room;
+        }));
+        
+        // Close edit mode and show success
+        setTourPreview(null);
+        setEditMode(false);
+        setEditingRoomId(null);
+        setSaveStatus('success');
+        setTimeout(() => setSaveStatus(null), 3000);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   // If in preview mode, show TourViewer
   if (tourPreview) {
     return (
       <TourViewer 
         tourHtml={tourPreview}
-        onClose={() => setTourPreview(null)}
-        closeButtonText="← Back to Editor"
+        onClose={() => {
+          setTourPreview(null);
+          setEditMode(false);
+          setEditingRoomId(null);
+        }}
+        closeButtonText={editMode ? "💾 Save & Close" : "← Back to Editor"}
       />
     );
   }
@@ -614,7 +803,7 @@ export default function TourBuilder() {
                         e.stopPropagation();
                         setStartRoom(room.id);
                       }}
-                      className={`w-full py-1 rounded text-sm ${
+                      className={`w-full py-1 rounded text-sm mb-2 ${
                         startRoom === room.id
                           ? 'bg-green-600 text-white'
                           : 'bg-gray-600 hover:bg-gray-500'
@@ -622,6 +811,17 @@ export default function TourBuilder() {
                     >
                       {startRoom === room.id ? '★ Start Room' : 'Set as Start'}
                     </button>
+                    {room.image && connections.some(c => c.from === room.id || c.to === room.id) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          editHotspots(room.id);
+                        }}
+                        className="w-full py-1 rounded text-sm bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        🎯 Edit Hotspots
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
