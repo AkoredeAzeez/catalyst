@@ -19,16 +19,16 @@ export default function InvestorPage() {
       <DashboardShell rightSidebar={<PropertiesSidebar />}>
         <div className="h-full flex flex-col gap-3">
           {/* Top section: Sidebar + Image */}
-          <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-3 flex-shrink-0">
+          <div className="flex gap-3 flex-shrink-0">
             {/* Left sidebar */}
             <div className="min-w-0">
               <InvestorSidebar />
             </div>
 
             {/* Property Image Display Container */}
-            <div className="relative flex flex-col items-center">
+            <div className="relative flex flex-col flex-shrink-0">
               {/* 3D view label */}
-              <div className="w-full flex items-center justify-center mb-2">
+              <div className="flex items-center justify-center mb-2">
                 <div className="flex items-center gap-2 text-neutral-700">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
@@ -39,8 +39,8 @@ export default function InvestorPage() {
 
               {/* Room name label above image */}
               {selectedIndex !== 0 && (
-                <div className="mb-1.5 w-full text-center">
-                  <h2 className="text-neutral-900 font-semibold text-sm">{currentRoomName}</h2>
+                <div className="mb-1.5 text-center">
+                  <h2 className="text-neutral-900 text-sm">{currentRoomName}</h2>
                 </div>
               )}
               

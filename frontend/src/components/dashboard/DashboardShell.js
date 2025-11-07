@@ -15,15 +15,15 @@ export default function DashboardShell({ children, rightSidebar }) {
   return (
     <div className="h-screen bg-white text-text overflow-hidden flex flex-col">
       <Navbar />
-      <div className="flex-1 overflow-hidden px-4 py-3">
+      <div className="flex-1 overflow-hidden pl-32 pr-6 py-3">
         {/* Two column layout: main content and right sidebar */}
-        <div className={`h-full grid grid-cols-1 gap-4 overflow-hidden ${rightSidebar ? 'lg:grid-cols-[1fr_280px]' : 'lg:grid-cols-1'}`}>
-          <main className="min-h-0 overflow-hidden">
+        <div className={`h-full flex gap-0 overflow-hidden ${rightSidebar ? '' : ''}`}>
+          <main className="min-h-0 overflow-hidden flex-shrink-0">
             {children}
           </main>
 
           {rightSidebar && (
-            <aside className="hidden lg:block overflow-y-auto">
+            <aside className="hidden lg:block overflow-y-auto w-[370px] flex-shrink-0 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {rightSidebar}
             </aside>
           )}

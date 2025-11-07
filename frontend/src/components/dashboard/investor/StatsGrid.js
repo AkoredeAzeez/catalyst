@@ -28,23 +28,24 @@ function PropertiesStat() {
   ]
 
   return (
-    <Card className="rounded-2xl shadow-lg bg-white border-0">
+    <Card className="rounded-2xl shadow-lg bg-white border-0 w-full max-w-[240px]">
       <CardHeader className="text-xs font-bold text-neutral-900 pb-1.5 pt-3 px-4">Properties Statistics</CardHeader>
-      <CardContent className="pt-0 px-4 pb-3">
+      <CardContent className="pt-0 px-4 pb-4">
         {/* Donut Chart with center text */}
-        <div className="flex justify-center mb-2 relative">
-          <ResponsiveContainer width={100} height={100}>
+        <div className="flex justify-center mb-3 relative">
+          <ResponsiveContainer width={130} height={150}>
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={32}
-                outerRadius={48}
-                paddingAngle={2}
+                innerRadius={42}
+                outerRadius={52}
+                paddingAngle={3}
                 dataKey="value"
                 startAngle={90}
                 endAngle={-270}
+                cornerRadius={10}
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -104,9 +105,9 @@ function SalesStat() {
   return (
     <Card className="rounded-2xl shadow-lg bg-white border-0">
       <CardHeader className="text-xs font-bold text-neutral-900 pb-1.5 pt-3 px-4">Sales Statistics</CardHeader>
-      <CardContent className="pt-0 px-4 pb-3">
+      <CardContent className="pt-0 px-4 pb-3 flex flex-col">
         {/* Top section with Total Sales and Rents */}
-        <div className="flex items-start justify-between gap-2.5 mb-2">
+        <div className="flex items-start justify-between gap-2.5 mb-1">
           {/* Total Sales - Left side */}
           <div className="flex-1">
             <div className="flex items-center gap-1 mb-0.5">
@@ -139,18 +140,18 @@ function SalesStat() {
         </div>
 
         {/* Divider line */}
-        <div className="border-t border-neutral-200 mb-2"></div>
+        <div className="border-t border-neutral-200 mb-1"></div>
 
         {/* Monthly Revenue Chart */}
-        <div>
-          <div className="flex items-center justify-between text-[9px] mb-1.5">
+        <div className="flex-1">
+          <div className="flex items-center justify-between text-[9px] mb-1">
             <span className="text-neutral-900 font-semibold">Monthly Revenue</span>
             <span className="text-emerald-500 font-bold">30%</span>
           </div>
           
           {/* Area Chart */}
-          <ResponsiveContainer width="100%" height={85}>
-            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={110}>
+            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom:0 }}>
               <defs>
                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
@@ -207,9 +208,9 @@ function CustomersList() {
   return (
     <Card className="rounded-2xl shadow-lg bg-white border-0">
       <CardHeader className="text-xs font-bold text-neutral-900 pb-1.5 pt-3 px-4">Customers List</CardHeader>
-      <CardContent className="pt-0 px-4 pb-3">
+      <CardContent className="pt-0 px-4 pb-3 flex flex-col">
         {/* Table header */}
-        <div className="grid grid-cols-4 gap-2.5 text-[9px] font-medium text-neutral-400 mb-2">
+        <div className="grid grid-cols-4 gap-2.5 text-[9px] font-medium text-neutral-400 mb-1">
           <div>Customer</div>
           <div>Phone Number</div>
           <div>Type</div>
@@ -217,9 +218,9 @@ function CustomersList() {
         </div>
         
         {/* Customer rows */}
-        <div className="space-y-2">
+        <div className="space-y-1 flex-1">
           {customers.map((customer, i) => (
-            <div key={i} className="grid grid-cols-4 gap-2.5 items-center text-[11px] border-b border-neutral-100 last:border-0 pb-2 last:pb-0">
+            <div key={i} className="grid grid-cols-4 gap-2.5 items-center text-[11px] border-b border-neutral-100 last:border-0 pb-1 last:pb-0">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-semibold text-neutral-900 truncate">{customer.name}</span>
               </div>
@@ -244,8 +245,8 @@ function CustomersList() {
 
 export default function StatsGrid() {
   return (
-    <div className="grid gap-3 lg:grid-cols-[220px_1fr_1fr]">
-      {/* Property Statistics - reduced from 264px to 220px */}
+    <div className="grid gap-3 lg:grid-cols-[200px_280px_360px] auto-rows-max">
+      {/* Property Statistics - aligned with left sidebar width */}
       <div>
         <PropertiesStat />
       </div>
