@@ -30,7 +30,7 @@ export default function DashboardShell({ children, rightSidebar }) {
         <div
           className={`h-full flex gap-0 overflow-hidden ${rightSidebar ? "" : ""}`}
         >
-          <main className="min-h-0 overflow-auto flex-shrink-0">
+          <main className="min-h-0 overflow-hidden flex-shrink-0">
             {children}
           </main>
 
