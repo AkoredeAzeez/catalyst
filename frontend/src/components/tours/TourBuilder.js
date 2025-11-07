@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Plus, Trash2, ArrowRight, Download, Play } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Plus, Trash2, ArrowRight, Eye, Download } from 'lucide-react';
 
 export default function TourBuilder() {
   const [rooms, setRooms] = useState([]);
@@ -10,12 +10,20 @@ export default function TourBuilder() {
   const [startRoom, setStartRoom] = useState(null);
   const [drawMode, setDrawMode] = useState(false);
   const [fromRoom, setFromRoom] = useState(null);
-  const [preview, setPreview] = useState(false);
+  const [tourIframe, setTourIframe] = useState(null);
+  const idCounter = useRef(1);
+
+  // Generate unique ID
+  const generateId = () => {
+    const id = idCounter.current;
+    idCounter.current += 1;
+    return id;
+  };
 
   // Add a new room
   const addRoom = () => {
     const newRoom = {
-      id: Date.now(),
+      id: generateId(),
       name: `Room ${rooms.length + 1}`,
       image: null,
       hotspots: [],
@@ -60,7 +68,7 @@ export default function TourBuilder() {
         setConnections([
           ...connections,
           {
-            id: Date.now(),
+            id: generateId(),
             from: fromRoom,
             to: roomId,
             label: '',
@@ -109,14 +117,12 @@ export default function TourBuilder() {
 
     const startKey = startRoom ? rooms.find(r => r.id === startRoom)?.name.toLowerCase().replace(/\s+/g, '_') : Object.keys(sceneConfig)[0];
 
-    // Create a proper JS object instead of JSON string for images
-    const scenesCode = Object.entries(sceneConfig).map(([key, val]) => {
-      return `'${key}': {
-        name: '${val.name}',
-        image: '${val.image}',
-        hotspots: ${JSON.stringify(val.hotspots)}
-      }`;
-    }).join(',\n');
+    // Build SCENES object as string to properly handle base64 images
+    const scenesEntries = Object.entries(sceneConfig).map(([key, val]) => {
+      const safeImage = (val.image || '').replace(/'/g, "\\'");
+      const hotspotsJson = JSON.stringify(val.hotspots);
+      return `'${key}': { name: '${val.name}', image: '${safeImage}', hotspots: ${hotspotsJson} }`;
+    }).join(',\n      ');
 
     const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
@@ -149,12 +155,21 @@ export default function TourBuilder() {
     <div class="help">Drag to look • Click hotspot to move • Pinch/scroll to zoom</div>
   </div>
 
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
   <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     const SCENES = {
-      ${scenesCode}
+      ${scenesEntries}
     };
     const START_SCENE_KEY = '${startKey}';
 
@@ -424,6 +439,16 @@ export default function TourBuilder() {
     return htmlTemplate;
   };
 
+  // View tour in iframe
+  const viewTour = () => {
+    if (rooms.length === 0) {
+      alert('Please add at least one room');
+      return;
+    }
+    const html = generateTourHTML();
+    setTourIframe(html);
+  };
+
   // Download tour
   const downloadTour = () => {
     if (rooms.length === 0) {
@@ -440,24 +465,22 @@ export default function TourBuilder() {
     URL.revokeObjectURL(url);
   };
 
-  if (preview) {
+  // View tour in fullscreen
+  if (tourIframe) {
     return (
-      <div className="w-full h-screen bg-gray-900 text-white p-4">
+      <div className="w-full h-screen bg-black">
         <button
-          onClick={() => setPreview(false)}
-          className="mb-4 px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+          onClick={() => setTourIframe(null)}
+          className="fixed top-4 left-4 z-50 px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 text-white"
         >
           ← Back to Editor
         </button>
-        <div className="text-center p-8 bg-gray-800 rounded">
-          <p className="mb-4">Preview HTML generated successfully! Download to view the tour.</p>
-          <button
-            onClick={downloadTour}
-            className="px-6 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center gap-2 mx-auto"
-          >
-            <Download size={18} /> Download Tour
-          </button>
-        </div>
+        <iframe
+          srcDoc={tourIframe}
+          className="w-full h-full border-none"
+          title="Virtual Tour"
+          allowFullScreen
+        />
       </div>
     );
   }
@@ -483,11 +506,18 @@ export default function TourBuilder() {
               <ArrowRight size={18} /> {drawMode ? 'Drawing Mode' : 'Draw Mode'}
             </button>
             <button
-              onClick={() => setPreview(true)}
+              onClick={viewTour}
               className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 flex items-center gap-2"
               disabled={rooms.length === 0}
             >
-              <Play size={18} /> Preview
+              <Eye size={18} /> View Tour
+            </button>
+            <button
+              onClick={downloadTour}
+              className="px-4 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center gap-2"
+              disabled={rooms.length === 0}
+            >
+              <Download size={18} /> Download
             </button>
           </div>
         </div>
@@ -616,7 +646,7 @@ export default function TourBuilder() {
                   <ol className="list-decimal list-inside space-y-1">
                     <li>Rename your room</li>
                     <li>Upload 360° equirectangular image</li>
-                    <li>Enable "Draw Mode" to connect rooms</li>
+                    <li>Enable &quot;Draw Mode&quot; to connect rooms</li>
                     <li>Click this room, then another to connect</li>
                     <li>Set a start room before generating</li>
                   </ol>
