@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, Eye } from 'lucide-react';
+import TourViewer from './TourViewer';
 
 export default function TourBuilder() {
   const [rooms, setRooms] = useState([]);
@@ -12,6 +13,7 @@ export default function TourBuilder() {
   const [fromRoom, setFromRoom] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null); // 'success', 'error', or null
+  const [tourPreview, setTourPreview] = useState(null); // For preview mode
   const idCounter = useRef(1);
 
   // Generate unique ID
@@ -496,6 +498,27 @@ export default function TourBuilder() {
     }
   }, [rooms, connections, startRoom, saveTour]);
 
+  // Preview tour
+  const previewTour = () => {
+    if (rooms.length === 0) {
+      alert('Please add at least one room before previewing');
+      return;
+    }
+    const html = generateTourHTML();
+    setTourPreview(html);
+  };
+
+  // If in preview mode, show TourViewer
+  if (tourPreview) {
+    return (
+      <TourViewer 
+        tourHtml={tourPreview}
+        onClose={() => setTourPreview(null)}
+        closeButtonText="← Back to Editor"
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -527,6 +550,13 @@ export default function TourBuilder() {
               }`}
             >
               <ArrowRight size={18} /> {drawMode ? 'Drawing Mode' : 'Draw Mode'}
+            </button>
+            <button
+              onClick={previewTour}
+              disabled={rooms.length === 0}
+              className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Eye size={18} /> Preview Tour
             </button>
             <button
               onClick={() => saveTour()}
