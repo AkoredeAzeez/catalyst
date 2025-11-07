@@ -1,23 +1,35 @@
-'use client'
-import { useAuthStore } from '@/store/auth.store'
-import AdminNavbar from '@/components/navbars/AdminNavbar'
-import InvestorNavbar from '@/components/navbars/InvestorNavbar'
+"use client";
+import { useAuthStore } from "@/store/auth.store";
+import AdminNavbar from "@/components/navbars/AdminNavbar";
+import InvestorNavbar from "@/components/navbars/InvestorNavbar";
 
-import AdminSidebar from '@/components/sidebars/AdminSidebar'
-import InvestorSidebar from '@/components/sidebars/InvestorSidebar'
+import AdminSidebar from "@/components/sidebars/AdminSidebar";
+import InvestorSidebar from "@/components/sidebars/InvestorSidebar";
 
 export default function DashboardShell({ children, rightSidebar }) {
-  const role = useAuthStore((s) => s.role)
+  const role = useAuthStore((s) => s.role);
 
-  const Navbar = role === 'admin' ? AdminNavbar : role === 'investor' ? InvestorNavbar : InvestorNavbar
-  const Sidebar = role === 'admin' ? AdminSidebar : role === 'investor' ? InvestorSidebar : InvestorSidebar
+  const Navbar =
+    role === "admin"
+      ? AdminNavbar
+      : role === "investor"
+        ? InvestorNavbar
+        : InvestorNavbar;
+  const Sidebar =
+    role === "admin"
+      ? AdminSidebar
+      : role === "investor"
+        ? InvestorSidebar
+        : InvestorSidebar;
 
   return (
     <div className="h-screen bg-white text-text overflow-hidden flex flex-col">
       <Navbar />
-      <div className="flex-1 overflow-hidden pl-32 pr-6 py-3">
+      <div className="flex-1 overflow-hidden mx-auto py-3">
         {/* Two column layout: main content and right sidebar */}
-        <div className={`h-full flex gap-0 overflow-hidden ${rightSidebar ? '' : ''}`}>
+        <div
+          className={`h-full flex gap-0 overflow-hidden ${rightSidebar ? "" : ""}`}
+        >
           <main className="min-h-0 overflow-hidden flex-shrink-0">
             {children}
           </main>
@@ -30,5 +42,5 @@ export default function DashboardShell({ children, rightSidebar }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
