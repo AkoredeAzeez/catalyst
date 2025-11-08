@@ -20,7 +20,7 @@ function PropertyCard({ property }) {
   };
 
   return (
-    <div className="rounded-[10px] min-w-72 max-w-80 h-96 bg-[#80808014]">
+    <div className="rounded-[10px] flex-1 min-w-64 max-w-[20rem] h-96 bg-[#80808014]">
       <div className="h-full flex flex-col p-2.5">
         {/* Property Image */}
         <div
