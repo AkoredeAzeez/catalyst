@@ -91,6 +91,83 @@ export async function GET(request) {
         beds: 6,
         units: 6,
         size: '7'
+      },
+      {
+        id: 9,
+        image: '/prop3.jpg',
+        status: 'Vacant',
+        price: '2,950',
+        title: 'Bungalow in Ikeja',
+        address: 'No 18, Allen Avenue, Ikeja.',
+        beds: 4,
+        units: 4,
+        size: '5'
+      },
+      {
+        id: 10,
+        image: '/prop1.jpg',
+        status: 'Occupied',
+        price: '4,500',
+        title: 'Luxury Villa in Ikoyi',
+        address: 'No 7, Kingsway Road, Ikoyi.',
+        beds: 9,
+        units: 9,
+        size: '10'
+      },
+      {
+        id: 11,
+        image: '/prop2.jpg',
+        status: 'Vacant',
+        price: '3,300',
+        title: 'Condo in Maryland',
+        address: 'No 33, Mobolaji Bank Anthony Way.',
+        beds: 5,
+        units: 5,
+        size: '6'
+      },
+      {
+        id: 12,
+        image: '/prop3.jpg',
+        status: 'Occupied',
+        price: '2,400',
+        title: 'Studio in Yaba',
+        address: 'No 21, Herbert Macaulay Way.',
+        beds: 2,
+        units: 2,
+        size: '3'
+      },
+      {
+        id: 13,
+        image: '/prop1.jpg',
+        status: 'Vacant',
+        price: '3,800',
+        title: 'Semi-Detached in Lekki',
+        address: 'No 9, Admiralty Way, Lekki Phase 1.',
+        beds: 6,
+        units: 6,
+        size: '7'
+      },
+      {
+        id: 14,
+        image: '/prop2.jpg',
+        status: 'Occupied',
+        price: '2,700',
+        title: 'Terrace in Magodo',
+        address: 'No 14, CMD Road, Magodo.',
+        beds: 4,
+        units: 4,
+        size: '5'
+      },
+      {
+        id: 15,
+        image: '/prop3.jpg',
+        status: 'Vacant',
+        price: '5,200',
+        title: 'Executive Mansion in VI',
+        address: 'No 1, Adeola Odeku Street, VI.',
+        beds: 12,
+        units: 12,
+        size: '15'
       }
     ]
 
