@@ -326,11 +326,12 @@ export default function PropertyBank() {
               placeholder="Search by title, address, status, or price..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-full pl-[44px] pr-[19.69px] text-sm rounded-[9.85px] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full h-full pl-11 pr-5 text-sm rounded-[9.85px] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               style={{
                 borderWidth: "0.98px",
                 borderColor: "#d1d5db",
                 borderStyle: "solid",
+                color: "#374151",
               }}
             />
           </div>
