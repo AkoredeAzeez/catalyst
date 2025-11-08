@@ -84,17 +84,17 @@ export default function AgentSidebar() {
   }
 
   return (
-    <Card className="rounded-[15px] bg-white border border-neutral-300 w-[271px] h-full">
-      <CardContent className="p-3.5 flex flex-col gap-[13px] items-center h-full overflow-y-auto scrollbar-hide"
+    <Card className="rounded-[15px] bg-white border border-neutral-300 w-[271px] h-fit">
+      <CardContent className="p-3.5 flex flex-col gap-[13px] items-center overflow-y-auto scrollbar-hide"
         style={{
           msOverflowStyle: 'none',
           scrollbarWidth: 'none'
         }}
       >
         {/* Profile Section */}
-        <Card className="rounded-[15px] border border-neutral-200 bg-white w-[243px] h-[202px]">
+        <Card className="rounded-[15px] border border-neutral-200 bg-white w-[243px] h-[191.9px]">
           <CardContent className="p-[17px] flex flex-col items-center justify-center gap-[17px] h-full">
-            <div className="relative w-14 h-14">
+            <div className="relative w-[68px] h-[68px]">
               <Image
                 src={profile.avatar}
                 alt={profile.name}
@@ -110,7 +110,11 @@ export default function AgentSidebar() {
             
             <button 
               onClick={handleViewProfile}
-              className="w-full bg-neutral-900 text-white rounded-lg py-1 text-[11px] font-semibold hover:bg-neutral-800 transition-colors"
+              className="bg-neutral-900 text-white rounded-[10px] text-[11px] font-semibold hover:bg-neutral-800 transition-colors"
+              style={{
+                width: '165px',
+                height: '35px'
+              }}
             >
               View Profile
             </button>
@@ -118,7 +122,7 @@ export default function AgentSidebar() {
         </Card>
 
         {/* Profile views statistics chart section */}
-        <Card className="rounded-[15px] border border-neutral-200 bg-white w-[243px] h-[134px]">
+        <Card className="rounded-[15px] border border-neutral-200 bg-white w-[243px] h-[127.3px]">
           <CardContent className="py-[6px] px-[15px] flex flex-col gap-[13px] h-full justify-center">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-neutral-900">Profile views statistics</span>
@@ -183,9 +187,9 @@ export default function AgentSidebar() {
         </Card>
 
         {/* Stats Grid - Profile Views and Vacant */}
-        <div className="flex gap-[24px] w-[243px] h-[74px]">
+        <div className="flex gap-[24px] w-[243px] h-[70.3px]">
           {statItems.map((stat, index) => (
-            <Card key={index} className="rounded-[10px] border border-neutral-200 bg-white w-[111px] h-[74px]">
+            <Card key={index} className="rounded-[10px] border border-neutral-200 bg-white w-[111px] h-[70.3px]">
               <CardContent className="p-[12px] flex flex-col gap-[12px] justify-center items-center h-full">
                 <p className="text-[9px] text-neutral-500 font-medium">{stat.label}</p>
                 <p className="text-sm font-bold text-neutral-900">{stat.value}</p>
@@ -195,7 +199,7 @@ export default function AgentSidebar() {
         </div>
 
         {/* Total Properties Card */}
-        <Card className="rounded-[10px] border border-neutral-200 bg-white w-[243px] h-[74px]">
+        <Card className="rounded-[10px] border border-neutral-200 bg-white w-[243px] h-[70.3px]">
           <CardContent className="p-[12px] flex flex-col gap-[12px] justify-center items-center h-full">
             <p className="text-[9px] text-neutral-500 font-medium text-center">total Properties</p>
             <p className="text-sm font-bold text-neutral-900 text-center">{stats.totalProperties.toLocaleString()}</p>
@@ -203,14 +207,14 @@ export default function AgentSidebar() {
         </Card>
 
         {/* Occupied and Vacant Grid */}
-        <div className="flex gap-[24px] w-[243px] h-[74px]">
-          <Card className="rounded-[10px] border border-neutral-200 bg-white w-[111px] h-[74px]">
+        <div className="flex gap-[24px] w-[243px] h-[70.3px]">
+          <Card className="rounded-[10px] border border-neutral-200 bg-white w-[111px] h-[70.3px]">
             <CardContent className="p-[12px] flex flex-col gap-[12px] justify-center items-center h-full">
               <p className="text-[9px] text-neutral-500 font-medium">Occupied</p>
               <p className="text-sm font-bold text-neutral-900">{stats.occupied.toLocaleString()}</p>
             </CardContent>
           </Card>
-          <Card className="rounded-[10px] border border-neutral-200 bg-white w-[111px] h-[74px]">
+          <Card className="rounded-[10px] border border-neutral-200 bg-white w-[111px] h-[70.3px]">
             <CardContent className="p-[12px] flex flex-col gap-[12px] justify-center items-center h-full">
               <p className="text-[9px] text-neutral-500 font-medium">Vacant</p>
               <p className="text-sm font-bold text-neutral-900">{stats.vacant.toLocaleString()}</p>
@@ -221,7 +225,15 @@ export default function AgentSidebar() {
         {/* Create New Button */}
         <button 
           onClick={handleCreateNew}
-          className="w-full bg-neutral-900 text-white rounded-lg py-1.5 text-[11px] font-semibold hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+          className="bg-neutral-900 text-white rounded-[10px] text-[11px] font-semibold hover:bg-neutral-800 transition-colors flex items-center justify-center"
+          style={{
+            width: '243px',
+            height: '35px',
+            gap: '10px',
+            borderWidth: '1.5px',
+            borderColor: 'transparent',
+            borderStyle: 'solid'
+          }}
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
