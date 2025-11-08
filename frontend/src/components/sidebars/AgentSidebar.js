@@ -79,8 +79,8 @@ export default function AgentSidebar() {
   }
 
   const handleCreateNew = () => {
-    // Navigate to create new property page or open a modal
-    router.push('/dashboard/agent/properties/new')
+    // Navigate to tour builder page
+    router.push('/dashboard/agent/builder')
   }
 
   return (

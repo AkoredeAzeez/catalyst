@@ -1,4 +1,4 @@
-import TourBuilder from '@/components/tours/TourBuilder';
+import Builder from '@/components/tours/builder';
 
 export const metadata = {
   title: 'Virtual Tour Builder | Admin Dashboard',
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function TourBuilderPage() {
-  return <TourBuilder />;
+  return <Builder />;
 }
