@@ -37,7 +37,7 @@ export default function AgentSidebar() {
 
   if (loading) {
     return (
-      <Card className="rounded-[15px] bg-white border border-neutral-300 w-[271px] h-fit">
+      <Card className="rounded-[15px] bg-white border border-neutral-300 w-auto h-fit">
         <CardContent className="p-4 flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900 mx-auto mb-2"></div>
@@ -50,7 +50,7 @@ export default function AgentSidebar() {
 
   if (error) {
     return (
-      <Card className="rounded-[15px] bg-white border border-neutral-300 w-[271px] h-fit">
+      <Card className="rounded-[15px] bg-white border border-neutral-300 w-auto h-fit">
         <CardContent className="p-4 flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <p className="text-xs text-red-500">{error}</p>
@@ -84,7 +84,7 @@ export default function AgentSidebar() {
   }
 
   return (
-    <Card className="rounded-[15px] bg-white border border-neutral-300 w-[271px] h-fit">
+    <Card className="rounded-[15px] bg-white border border-neutral-300 w-auto h-fit">
       <CardContent className="p-3.5 flex flex-col gap-[13px] items-center overflow-y-auto scrollbar-hide"
         style={{
           msOverflowStyle: 'none',
