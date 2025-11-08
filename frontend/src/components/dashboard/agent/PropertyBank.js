@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import AgentSidebar from "@/components/sidebars/AgentSidebar";
+import { HeaderWithSearch } from "./HeaderWithSearch";
 
 function PropertyCard({ property }) {
   const router = useRouter();
@@ -287,124 +288,77 @@ export default function PropertyBank() {
   });
 
   return (
-    <div>
-        {/* Header with Search */}
-        <div className="flex items-center justify-between mb-4 mx-32">
-          <h2
-            className="font-semibold text-neutral-900"
-            style={{
-              fontFamily: "Montserrat",
-              fontWeight: 600,
-              fontSize: "14.93px",
-              lineHeight: "100%",
-              letterSpacing: "0%",
-              width: "139px",
-              height: "18px",
-            }}
-          >
-            My Property Bank
-          </h2>
-
-          {/* Search Bar */}
-          <div className="relative w-[702px] h-[32px]">
-            <svg
-              className="absolute left-[19.69px] top-1/2 -translate-y-1/2 w-[13.29px] h-[13.29px] text-neutral-400"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search by title, address, status, or price..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-full pl-11 pr-5 text-sm rounded-[9.85px] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              style={{
-                borderWidth: "0.98px",
-                borderColor: "#d1d5db",
-                borderStyle: "solid",
-                color: "#374151",
-              }}
-            />
+    <div
+      className="
+        w-full max-w-7xl h-full max-h-full mx-auto
+        px-1 grid grid-cols-[1fr_auto] grid-rows-[1fr_auto] gap-4
+      "
+    >
+      <HeaderWithSearch
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
+      <div
+        className="
+          row-start-2 max-h-full h-full overflow-y-auto scrollbar-hide
+          border border-neutral-200 rounded-2xl
+          p-4
+        "
+      >
+        {loading ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+              <p className="text-sm text-neutral-500">Loading properties...</p>
+            </div>
           </div>
-        </div>
-    <div className="flex gap-4 justify-center max-w-screen px-4">
-      {/* Left side: Header + Property Grid */}
-      <div className="flex-1 min-w-0">
-
-        {/* Property Grid with Border */}
-        <div
-          className="border border-neutral-200 rounded-2xl"
-          style={{ height: "700px" }}
-        >
-          <div className="h-full overflow-y-auto scrollbar-hide p-4">
-            {loading ? (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-                  <p className="text-sm text-neutral-500">
-                    Loading properties...
-                  </p>
-                </div>
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <p className="text-sm text-red-500 mb-2">{error}</p>
-                  <button
-                    onClick={fetchProperties}
-                    className="text-sm text-emerald-600 underline hover:text-emerald-700"
-                  >
-                    Retry
-                  </button>
-                </div>
-              </div>
-            ) : filteredProperties.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <svg
-                    className="w-16 h-16 text-neutral-300 mx-auto mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <p className="text-sm text-neutral-500">
-                    No properties found
-                  </p>
-                  {searchQuery && (
-                    <p className="text-xs text-neutral-400 mt-2">
-                      Try adjusting your search
-                    </p>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="gap-3 flex flex-wrap justify-evenly max-w-5xl">
-                {/**grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">**/}
-                {filteredProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
-              </div>
-            )}
+        ) : error ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <p className="text-sm text-red-500 mb-2">{error}</p>
+              <button
+                onClick={fetchProperties}
+                className="text-sm text-emerald-600 underline hover:text-emerald-700"
+              >
+                Retry
+              </button>
+            </div>
           </div>
-        </div>
+        ) : filteredProperties.length === 0 ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <svg
+                className="w-16 h-16 text-neutral-300 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <p className="text-sm text-neutral-500">No properties found</p>
+              {searchQuery && (
+                <p className="text-xs text-neutral-400 mt-2">
+                  Try adjusting your search
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="gap-3 flex flex-wrap justify-evenly max-w-5xl">
+            {filteredProperties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
       </div>
-
+      <div className="row-start-2 max-h-full h-full overflow-y-auto scrollbar-hide">
         <AgentSidebar />
+      </div>
     </div>
-  </div>
   );
 }
