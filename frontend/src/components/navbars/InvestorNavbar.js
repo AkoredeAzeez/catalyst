@@ -51,8 +51,8 @@ export function InvestorNavbar() {
   const hasNotifications = notificationCount > 0
   
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-100 bg-white backdrop-blur-sm">
-      <div className="flex h-11 items-center justify-between pl-32 pr-36">
+    <header className="sticky top-0 z-40 border-b border-neutral-100 bg-white backdrop-blur-sm py-2">
+      <div className="flex h-11 items-center justify-between mx-32">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">

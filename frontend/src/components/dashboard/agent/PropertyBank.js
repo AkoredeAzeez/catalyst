@@ -287,11 +287,9 @@ export default function PropertyBank() {
   });
 
   return (
-    <div className="flex gap-4 justify-center max-w-screen px-4">
-      {/* Left side: Header + Property Grid */}
-      <div className="flex-1 min-w-0">
+    <div>
         {/* Header with Search */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 mx-32">
           <h2
             className="font-semibold text-neutral-900"
             style={{
@@ -336,6 +334,9 @@ export default function PropertyBank() {
             />
           </div>
         </div>
+    <div className="flex gap-4 justify-center max-w-screen px-4">
+      {/* Left side: Header + Property Grid */}
+      <div className="flex-1 min-w-0">
 
         {/* Property Grid with Border */}
         <div
@@ -391,7 +392,7 @@ export default function PropertyBank() {
                 </div>
               </div>
             ) : (
-              <div className="gap-3 flex flex-wrap justify-evenly">
+              <div className="gap-3 flex flex-wrap justify-evenly max-w-5xl">
                 {/**grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">**/}
                 {filteredProperties.map((property) => (
                   <PropertyCard key={property.id} property={property} />
@@ -402,10 +403,8 @@ export default function PropertyBank() {
         </div>
       </div>
 
-      {/* Right sidebar */}
-      <div className="mt-[50px] w-fit">
         <AgentSidebar />
-      </div>
     </div>
+  </div>
   );
 }
