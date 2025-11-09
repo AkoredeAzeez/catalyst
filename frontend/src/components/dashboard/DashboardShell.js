@@ -23,14 +23,17 @@ export default function DashboardShell({ children, rightSidebar }) {
         : InvestorSidebar;
 
   return (
-    <div className="h-screen bg-white text-text flex flex-col">
+    <div className="h-screen bg-white text-text overflow-hidden flex flex-col">
       <Navbar />
-      <div className="flex-1 p-3 overflow-hidden">
+      <div className="flex-1 overflow-hidden mx-auto py-3">
         {/* Two column layout: main content and right sidebar */}
-        <div className="h-full flex gap-0">
-          <main className="shrink-0 h-full min-h-0 max-h-full w-full min-w-0 max-w-full">
+        <div
+          className={`h-full flex gap-0 overflow-hidden ${rightSidebar ? "" : ""}`}
+        >
+          <main className="min-h-0 overflow-hidden flex-shrink-0">
             {children}
           </main>
+
           {rightSidebar && (
             <aside className="hidden lg:block overflow-y-auto w-[370px] flex-shrink-0 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {rightSidebar}

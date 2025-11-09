@@ -96,16 +96,6 @@ export function InvestorNavbar() {
               Tenants
             </Button>
           </Link>
-          <Link href="/home">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs font-medium text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 px-3 h-8 gap-1.5"
-            >
-              <Home className="h-3 w-3" />
-              Home
-            </Button>
-          </Link>
         </nav>
 
         {/* Right side - Notifications & Profile */}

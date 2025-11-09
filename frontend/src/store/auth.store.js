@@ -22,8 +22,8 @@ import { create } from 'zustand'
  */
 export const useAuthStore = create((set) => ({
 	token: undefined,
-	role: 'agent',
+	role: 'investor',
 	user: null,
 	setAuth: (data) => set((s) => ({ ...s, ...data })),
-	logout: () => set({ token: undefined, role: 'agent', user: null }),
+	logout: () => set({ token: undefined, role: 'investor', user: null }),
 }))

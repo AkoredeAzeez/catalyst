@@ -191,11 +191,11 @@ export function useTourBuilder() {
 </head>
 <body>
   <div id="app"></div>
-  ${isEditMode ? '<div class="edit-banner">🎯 EDIT MODE - Drag hotspots to reposition • Navigate to other rooms to edit their hotspots</div><div class="room-indicator" id="roomIndicator"></div>' : ''}
+  ${isEditMode ? '<div class="edit-banner"> EDIT MODE - Drag hotspots to reposition • Navigate to other rooms to edit their hotspots</div><div class="room-indicator" id="roomIndicator"></div>' : ''}
   <div class="topright">
     <button class="btn" id="resetView">Reset View</button>
     <button class="btn" id="toggleLabels">Toggle Labels</button>
-    ${isEditMode ? '<button class="btn" id="savePositions">💾 Save Positions</button>' : ''}
+    ${isEditMode ? '<button class="btn" id="savePositions"> Save Positions</button>' : ''}
   </div>
   <div class="hud">
     <div class="pill"><span>Room:</span> <span class="scene" id="sceneName">—</span></div>
